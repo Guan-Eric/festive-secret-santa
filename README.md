@@ -1,50 +1,71 @@
-# Welcome to your Expo app 👋
+# 🎄 Festive Secret Santa App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A beautiful React Native app for organizing Secret Santa gift exchanges with Amazon wishlist integration.
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+- 🎅 Create and manage Secret Santa groups
+- 🎁 Search Amazon products and add to wishlists
+- ⭐ Group-specific wishlists
+- 🔔 Push notifications
+- ❄️ Festive UI with snowflakes and animations
+- 🎄 Firebase authentication and Firestore database
 
-   ```bash
-   npm install
-   ```
+## 🚀 Setup Instructions
 
-2. Start the app
+### 1. Install Dependencies
 
-   ```bash
-   npx expo start
-   ```
+\`\`\`bash
+npm install
+\`\`\`
 
-In the output, you'll find options to open the app in a
+### 2. Firebase Setup
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+1. Create a Firebase project at https://console.firebase.google.com
+2. Enable Authentication (Email/Password)
+3. Enable Firestore Database
+4. Copy your Firebase config to `firebase.config.js`
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 3. Amazon Affiliate Setup
 
-## Get a fresh project
+1. Sign up for Amazon Associates at https://affiliate-program.amazon.com
+2. Get your Associate Tag
+3. Update the tag in `services/amazonAPI.js`
 
-When you're ready, run:
+### 4. Run the App
 
-```bash
-npm run reset-project
-```
+\`\`\`bash
+# Start Expo
+npx expo start
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+# Run on iOS
+npx expo run:ios
 
-## Learn more
+# Run on Android
+npx expo run:android
+\`\`\`
 
-To learn more about developing your project with Expo, look at the following resources:
+## 📱 Screens
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- **Onboarding** - 3 intro screens
+- **Login/Signup** - Authentication
+- **Groups** - View and create Secret Santa groups
+- **Search** - Find Amazon products
+- **Wishlist** - Manage group-specific wishlists
+- **Person Wishlist** - View assigned person's wishlist
 
-## Join the community
+## 🔧 Tech Stack
 
-Join our community of developers creating universal apps.
+- React Native + Expo
+- NativeWind (Tailwind CSS)
+- Firebase (Auth + Firestore)
+- Expo Router
+- Amazon Product API
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 📝 License
+
+MIT
+
+---
+
+Made with 🎅 and ❤️

@@ -1,33 +1,58 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { View } from 'react-native';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopWidth: 2,
+          borderTopColor: '#E7E5E4',
+          paddingBottom: 8,
+          paddingTop: 8,
+          height: 70,
+        },
+        tabBarActiveTintColor: '#065F46',
+        tabBarInactiveTintColor: '#78716C',
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+      }}
+    >
       <Tabs.Screen
-        name="index"
+        name="(group)"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'My Groups',
+          tabBarIcon: ({ color, focused }) => (
+            <View >
+              <Ionicons name="people" size={22} color={color} />
+            </View>
+          ),
+          tabBarLabel: ({ focused }) => focused ? '' : 'Groups',
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="(search)"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Search Gifts',
+          tabBarIcon: ({ color, focused }) => (
+            <View >
+              <Ionicons name="search" size={22} color={color} />
+            </View>
+          ),
+          tabBarLabel: ({ focused }) => focused ? '' : 'Search',
+        }}
+      />
+      <Tabs.Screen
+        name="(wishlist)"
+        options={{
+          title: 'My Wishlist',
+          tabBarIcon: ({ color, focused }) => (
+            <View >
+              <Ionicons name="heart" size={22} color={color} />
+            </View>
+          ),
+          tabBarLabel: ({ focused }) => focused ? '' : 'Wishlist',
         }}
       />
     </Tabs>
