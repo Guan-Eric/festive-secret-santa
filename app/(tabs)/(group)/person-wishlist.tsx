@@ -1,13 +1,12 @@
 // app/(tabs)/(group)/person-wishlist.tsx
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { db } from '../../../firebase';
-import { WishlistItem } from '../../../types';
+import { WishlistItem } from '../../../types/index';
 
 export default function PersonWishlistScreen() {
   const { groupId, personId, personName, accent } = useLocalSearchParams();
@@ -71,12 +70,6 @@ export default function PersonWishlistScreen() {
 
   return (
     <View className="flex-1 bg-stone-50">
-      <LinearGradient
-        colors={getGradientColors()}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pt-12 pb-4"
-      >
         <SafeAreaView>
           <View className="flex-row items-center mb-2">
             <TouchableOpacity 
@@ -95,7 +88,6 @@ export default function PersonWishlistScreen() {
             </View>
           </View>
         </SafeAreaView>
-      </LinearGradient>
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
@@ -154,17 +146,13 @@ export default function PersonWishlistScreen() {
             </>
           )}
 
-          <LinearGradient
-            colors={['rgba(234, 179, 8, 0.2)', 'rgba(249, 115, 22, 0.2)']}
-            className="rounded-2xl p-4 mb-6 border-2 border-yellow-500/30"
-          >
+
             <View className="flex-row items-start">
               <Text className="text-2xl mr-3">💡</Text>
               <Text className="flex-1 text-stone-700 text-sm">
                 Remember to keep your gift a secret! The magic of Secret Santa is in the surprise. 🎅
               </Text>
             </View>
-          </LinearGradient>
 
           <View className="h-20" />
         </ScrollView>

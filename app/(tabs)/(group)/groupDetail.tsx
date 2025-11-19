@@ -1,13 +1,13 @@
 // app/(tabs)/(group)/groupDetail.tsx
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, SafeAreaView, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '../../../firebase';
 import { matchSecretSantas } from '../../../services/secretSantaMatcher';
-import { Group } from '../../../types';
+import { Group } from '../../../types/index';
 
 export default function GroupDetailScreen() {
   const { groupId } = useLocalSearchParams();
@@ -110,12 +110,6 @@ export default function GroupDetailScreen() {
 
   return (
     <View className="flex-1 bg-stone-50">
-      <LinearGradient
-        colors={['#7f1d1d', '#065f46']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pt-12 pb-4"
-      >
         <SafeAreaView>
           <View className="flex-row items-center mb-4">
             <TouchableOpacity 
@@ -140,7 +134,6 @@ export default function GroupDetailScreen() {
             </TouchableOpacity>
           </View>
         </SafeAreaView>
-      </LinearGradient>
 
       <ScrollView className="flex-1 px-4 pt-6">
         {/* Group Info */}
@@ -231,10 +224,7 @@ export default function GroupDetailScreen() {
         )}
 
         {/* Invite Instructions */}
-        <LinearGradient
-          colors={['rgba(234, 179, 8, 0.2)', 'rgba(249, 115, 22, 0.2)']}
-          className="rounded-2xl p-5 mb-6 border-2 border-yellow-500/30"
-        >
+       
           <View className="flex-row items-start">
             <Text className="text-2xl mr-3">💡</Text>
             <View className="flex-1">
@@ -249,7 +239,7 @@ export default function GroupDetailScreen() {
               </Text>
             </View>
           </View>
-        </LinearGradient>
+   
 
         <View className="h-20" />
       </ScrollView>

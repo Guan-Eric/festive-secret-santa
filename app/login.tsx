@@ -1,9 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { auth } from '../firebase';
 
 export default function LoginScreen() {
@@ -31,10 +30,6 @@ export default function LoginScreen() {
 
   return (
     <View className="flex-1">
-      <LinearGradient
-        colors={['#FEF2F2', '#FAFAF9', '#ECFDF5']}
-        style={StyleSheet.absoluteFillObject}
-      >
         <SafeAreaView className="flex-1">
           <KeyboardAvoidingView 
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -110,7 +105,6 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </KeyboardAvoidingView>
         </SafeAreaView>
-      </LinearGradient>
     </View>
   );
 }

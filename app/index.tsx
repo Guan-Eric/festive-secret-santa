@@ -19,7 +19,7 @@ function Index() {
  
           return;
         }
-        router.replace("/(tabs)/group")
+        router.replace("/(tabs)/(group)/group")
         
       } catch (error) {
         console.error('Error in auth check:', error);

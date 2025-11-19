@@ -1,10 +1,10 @@
 // app/(tabs)/(search)/search.tsx
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '../../../firebase';
 import { searchAmazonProducts } from '../../../services/amazonAPI';
 import { AmazonProduct } from '../../../types/index';
@@ -71,13 +71,8 @@ export default function SearchScreen() {
   };
 
   return (
-    <View className="flex-1 bg-red-950">
-      <LinearGradient
-        colors={['#7f1d1d', '#065f46']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pt-12 pb-4"
-      >
+    <View className="flex-1 bg-stone-50">
+    
         <SafeAreaView>
           <View className="flex-row items-center mb-4">
             <TouchableOpacity 
@@ -87,7 +82,7 @@ export default function SearchScreen() {
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <View className="flex-1">
-            <Text className="text-3xl font-bold text-white">
+              <Text className="text-3xl font-bold text-white">
                 🔔 Search Gifts
               </Text>
               <Text className="text-white/70 text-sm">
@@ -97,20 +92,20 @@ export default function SearchScreen() {
           </View>
 
           {/* Search Bar */}
-          <View className="flex-row items-center bg-white/15 border-2 border-white/30 rounded-2xl px-5 py-4">
-            <Ionicons name="search" size={24} color="rgba(255,255,255,0.7)" />
+          <View className="flex-row items-center bg-white rounded-2xl px-5 py-4 border-2 border-stone-200">
+            <Ionicons name="search" size={24} color="#78716C" />
             <TextInput
               placeholder="Search for gifts..."
-              placeholderTextColor="rgba(255,255,255,0.6)"
+              placeholderTextColor="#A8A29E"
               value={searchQuery}
               onChangeText={setSearchQuery}
               onSubmitEditing={handleSearch}
               returnKeyType="search"
-              className="flex-1 text-white text-lg ml-3"
+              className="flex-1 text-stone-900 text-lg ml-3"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={24} color="rgba(255,255,255,0.5)" />
+                <Ionicons name="close-circle" size={24} color="#A8A29E" />
               </TouchableOpacity>
             )}
           </View>
@@ -118,40 +113,39 @@ export default function SearchScreen() {
           <TouchableOpacity
             onPress={handleSearch}
             disabled={loading}
-            className="bg-white py-4 rounded-2xl items-center mt-4 active:scale-95"
+            className="bg-white py-4 rounded-2xl items-center mt-4 active:scale-95 border-2 border-emerald-200"
             activeOpacity={0.8}
           >
             {loading ? (
-              <ActivityIndicator color="#7f1d1d" />
+              <ActivityIndicator color="#065f46" />
             ) : (
-              <Text className="text-stone-900 font-bold text-lg">
+              <Text className="text-emerald-700 font-bold text-lg">
                 🎁 Search Amazon
               </Text>
             )}
           </TouchableOpacity>
         </SafeAreaView>
-      </LinearGradient>
 
       <ScrollView className="flex-1 px-4 pt-6">
         {products.length === 0 && !loading ? (
           <View className="items-center py-20">
             <Text className="text-8xl mb-6">🎁</Text>
-            <Text className="text-2xl font-semibold text-white/90 mb-2">
+            <Text className="text-2xl font-semibold text-stone-900 mb-2">
               Search for gifts! 🎄
             </Text>
-            <Text className="text-white/70 text-center">
+            <Text className="text-stone-600 text-center">
               Enter a search term above to find perfect gifts on Amazon
             </Text>
           </View>
         ) : (
           products.map(product => (
-            <View key={product.id} className="bg-white/15 border-2 border-white/30 rounded-3xl p-6 mb-4">
+            <View key={product.id} className="bg-white border-2 border-stone-200 rounded-3xl p-6 mb-4">
               <View className="mb-4">
-                <Text className="text-xl font-bold text-white mb-2" numberOfLines={2}>
+                <Text className="text-xl font-bold text-stone-900 mb-2" numberOfLines={2}>
                   {product.title}
                 </Text>
                 {product.price && product.price !== 'N/A' && (
-                  <Text className="text-3xl font-bold text-green-300">
+                  <Text className="text-3xl font-bold text-emerald-700">
                     {product.price}
                   </Text>
                 )}
@@ -160,7 +154,7 @@ export default function SearchScreen() {
               <TouchableOpacity
                 onPress={() => handleAddToWishlist(product)}
                 disabled={adding === product.id}
-                className="py-4 rounded-xl items-center border-2 border-white/30 active:scale-95"
+                className="py-4 rounded-xl items-center active:scale-95"
                 style={{ backgroundColor: '#059669' }}
                 activeOpacity={0.8}
               >
@@ -180,17 +174,14 @@ export default function SearchScreen() {
         )}
 
         {products.length > 0 && (
-          <LinearGradient
-            colors={['rgba(234, 179, 8, 0.3)', 'rgba(249, 115, 22, 0.3)']}
-            className="rounded-2xl p-4 mb-6 border-2 border-yellow-500/30"
-          >
+          <View className="bg-amber-50 rounded-2xl p-4 mb-6 border-2 border-amber-200">
             <View className="flex-row items-start">
               <Text className="text-2xl mr-3">💡</Text>
-              <Text className="flex-1 text-white text-sm">
+              <Text className="flex-1 text-amber-800 text-sm">
                 These products are from Amazon. When your Secret Santa buys through our affiliate links, it helps keep our app free! 🎅
               </Text>
             </View>
-          </LinearGradient>
+          </View>
         )}
 
         <View className="h-20" />

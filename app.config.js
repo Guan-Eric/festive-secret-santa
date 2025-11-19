@@ -1,7 +1,7 @@
 export default {
   expo: {
     name: "Secret Santa: Wishlist",
-    slug: "Secret Santa: Wishlist",
+    slug: "secret-santa-wishlist",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
@@ -9,7 +9,11 @@ export default {
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
-      supportsTablet: true
+      bundleIdentifier: 'com.secretsanta.app',
+      supportsTablet: true,
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
     },
     android: {
       adaptiveIcon: {
@@ -48,7 +52,10 @@ export default {
       storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
       messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
       appId: process.env.FIREBASE_APP_ID,
-      measurementId: process.env.FIREBASE_MEASUREMENT_ID
+      measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+      eas: {
+        projectId: "376a2263-d380-4d93-b122-d18307812dc7"
+      }
     },
     experiments: {
       typedRoutes: true,

@@ -1,16 +1,6 @@
 // services/secretSantaMatcher.ts
 
-interface GroupMember {
-  userId: string;
-  name: string;
-}
-
-interface Assignment {
-  giverId: string;
-  giverName: string;
-  receiverId: string;
-  receiverName: string;
-}
+import { Assignment, GroupMember } from "../types/index";
 
 export const matchSecretSantas = (members: GroupMember[]): Assignment[] => {
   // Fisher-Yates shuffle with constraint that no one gets themselves

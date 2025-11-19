@@ -1,5 +1,4 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useState } from 'react';
@@ -70,12 +69,6 @@ export default function CreateGroupScreen() {
 
   return (
     <View className="flex-1 bg-red-950">
-      <LinearGradient
-        colors={['#7f1d1d', '#065f46']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pt-12 pb-4"
-      >
         <SafeAreaView>
           <View className="flex-row items-center mb-2">
             <TouchableOpacity 
@@ -94,7 +87,6 @@ export default function CreateGroupScreen() {
             </View>
           </View>
         </SafeAreaView>
-      </LinearGradient>
 
       <ScrollView className="flex-1 px-4 pt-6">
         {/* Group Name */}
@@ -184,17 +176,12 @@ export default function CreateGroupScreen() {
         </View>
 
         {/* Info Box */}
-        <LinearGradient
-          colors={['rgba(234, 179, 8, 0.2)', 'rgba(249, 115, 22, 0.2)']}
-          className="rounded-2xl p-4 mb-6 border-2 border-yellow-500/30"
-        >
           <View className="flex-row items-start">
             <Text className="text-2xl mr-3">ℹ️</Text>
             <Text className="flex-1 text-white/80 text-sm">
               Participants will receive an email invitation to join. Once everyone joins, you can match Secret Santas! 🎅
             </Text>
           </View>
-        </LinearGradient>
 
         {/* Create Button */}
         <TouchableOpacity

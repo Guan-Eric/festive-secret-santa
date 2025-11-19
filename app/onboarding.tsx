@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Dimensions, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -47,10 +46,6 @@ export default function OnboardingScreen() {
 
   return (
     <View className="flex-1 bg-gradient-to-br from-red-50 via-stone-50 to-emerald-50">
-      <LinearGradient
-        colors={['#FEF2F2', '#FAFAF9', '#ECFDF5']}
-        style={StyleSheet.absoluteFillObject}
-      />
       <SafeAreaView className="flex-1">
         {/* Skip Button */}
         {currentIndex < screens.length - 1 && (
