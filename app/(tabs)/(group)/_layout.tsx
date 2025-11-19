@@ -7,6 +7,7 @@ export default function GroupLayout() {
       <Stack.Screen name="createGroup" />
       <Stack.Screen name="group" />
       <Stack.Screen name="person-wishlist" />
+      <Stack.Screen name="groupDetail" />
     </Stack>
   );
 }
