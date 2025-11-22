@@ -24,6 +24,7 @@ export interface Group {
   emoji: string;
   colors?: string[];
   accent?: string;
+  creatorName: string;
 }
 
 export interface GroupMember {

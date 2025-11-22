@@ -1,12 +1,12 @@
 // app/(tabs)/(search)/search.tsx
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { auth, db } from '../../../firebase';
+import { auth } from '../../../firebase';
 import { searchAmazonProducts } from '../../../services/amazonAPI';
+import { addWishlistItem } from '../../../services/wishlistService';
 import { AmazonProduct } from '../../../types/index';
 
 export default function SearchScreen() {
@@ -46,16 +46,15 @@ export default function SearchScreen() {
       const userId = auth.currentUser?.uid;
       if (!userId) throw new Error('Not authenticated');
 
-      await addDoc(collection(db, 'wishlistItems'), {
+      await addWishlistItem({
         userId,
-        groupId,
+        groupId: groupId as string,
         productName: product.title,
         productUrl: product.affiliateUrl,
-        productImage: product.image,
+        productImage: product.image ?? undefined,
         price: product.price,
         asin: product.asin,
         emoji: '🎁',
-        createdAt: serverTimestamp(),
       });
 
       Alert.alert('Added!', `${product.title} has been added to your wishlist! 🎁`, [

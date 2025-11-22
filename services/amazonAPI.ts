@@ -1,75 +1,46 @@
-import axios from 'axios';
+// services/amazonAPI.ts
+import Constants from 'expo-constants';
 
-// You'll need to sign up for Amazon Product Advertising API
-// https://affiliate-program.amazon.com/help/operating/api
-export const searchAmazonProducts = async (query) => {
-  try {
-    // This is a simplified example. You'll need to implement proper AWS signing
-    // Consider using a library like 'amazon-paapi' or create a backend API
-    
-    const response = await axios.post(
-      'https://webservices.amazon.com/paapi5/searchitems',
-      {
-        Keywords: query,
-        PartnerTag: AMAZON_ASSOCIATE_TAG,
-        PartnerType: 'Associates',
-        Marketplace: 'www.amazon.com',
-        Resources: [
-          'Images.Primary.Large',
-          'ItemInfo.Title',
-          'ItemInfo.Features',
-          'Offers.Listings.Price'
-        ]
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Amz-Target': 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems',
-          // Add AWS signature headers here
-        }
-      }
-    );
+// Configuration - Replace these with your actual Amazon Associate credentials
+const AMAZON_ASSOCIATE_TAG = Constants.expoConfig?.extra?.amazonAssociateTag;
 
-    return response.data.SearchResult.Items.map(item => ({
-      id: item.ASIN,
-      title: item.ItemInfo.Title.DisplayValue,
-      price: item.Offers?.Listings?.[0]?.Price?.DisplayAmount || 'N/A',
-      image: item.Images?.Primary?.Large?.URL,
-      url: item.DetailPageURL,
-      affiliateUrl: `${item.DetailPageURL}?tag=${AMAZON_ASSOCIATE_TAG}`
-    }));
-  } catch (error) {
-    console.error('Amazon API Error:', error);
-    // Return mock data for development
-    return getMockProducts(query);
-  }
-};
-
-const getMockProducts = (query) => {
+export const searchAmazonProducts = async (query: string) => {
+  // Return a manual entry option with direct Amazon search
   return [
     {
-      id: '1',
+      id: 'manual-entry',
+      asin: '',
+      title: '🔍 Search Amazon for "' + query + '"',
+      price: 'Click to browse',
+      image: null,
+      url: `https://www.amazon.com/s?k=${encodeURIComponent(query)}&tag=${AMAZON_ASSOCIATE_TAG}`,
+      affiliateUrl: `https://www.amazon.com/s?k=${encodeURIComponent(query)}&tag=${AMAZON_ASSOCIATE_TAG}`,
+    },
+    {
+      id: 'manual-entry-2',
+      asin: '',
+      title: '✍️ Manually add a wishlist item',
+      price: 'Custom entry',
+      image: null,
+      url: '',
+      affiliateUrl: '',
+      isManual: true,
+    }
+  ];
+};
+
+const getMockProducts = (query: string) => {
+  // Keep your existing mock products as fallback
+  return [
+    {
+      id: `1-${Date.now()}`,
+      asin: '',
       title: `${query} - Premium Quality`,
       price: '$29.99',
       image: null,
-      url: 'https://amazon.com',
-      affiliateUrl: `https://amazon.com?tag=${AMAZON_ASSOCIATE_TAG}`
+      url: `https://www.amazon.com/s?k=${encodeURIComponent(query)}&tag=${AMAZON_ASSOCIATE_TAG}`,
+      affiliateUrl: `https://www.amazon.com/s?k=${encodeURIComponent(query)}&tag=${AMAZON_ASSOCIATE_TAG}`,
     },
-    {
-      id: '2',
-      title: `${query} - Best Seller`,
-      price: '$39.99',
-      image: null,
-      url: 'https://amazon.com',
-      affiliateUrl: `https://amazon.com?tag=${AMAZON_ASSOCIATE_TAG}`
-    },
-    {
-      id: '3',
-      title: `${query} - Holiday Special`,
-      price: '$49.99',
-      image: null,
-      url: 'https://amazon.com',
-      affiliateUrl: `https://amazon.com?tag=${AMAZON_ASSOCIATE_TAG}`
-    }
+    // ... more mock products
   ];
 };

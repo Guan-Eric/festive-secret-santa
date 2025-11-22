@@ -53,6 +53,7 @@ export default {
       messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
       appId: process.env.FIREBASE_APP_ID,
       measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+      amazonAssociateTag: process.env.AMAZON_ASSOCIATE_TAG,
       eas: {
         projectId: "376a2263-d380-4d93-b122-d18307812dc7"
       }

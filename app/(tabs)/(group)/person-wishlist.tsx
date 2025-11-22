@@ -59,35 +59,46 @@ export default function PersonWishlistScreen() {
     return colors[accent as keyof typeof colors] || colors.emerald;
   };
 
-  const getGradientColors = () => {
-    const gradients = {
-      emerald: ['#065f46', '#059669'],
-      red: ['#991b1b', '#dc2626'],
-      amber: ['#92400e', '#d97706']
+  const getBgColor = () => {
+    const colors = {
+      emerald: '#ECFDF5',
+      red: '#FEF2F2',
+      amber: '#FFFBEB'
     };
-    return gradients[accent as keyof typeof gradients] || gradients.emerald;
+    return colors[accent as keyof typeof colors] || colors.emerald;
+  };
+
+  const getBorderColor = () => {
+    const colors = {
+      emerald: '#D1FAE5',
+      red: '#FECACA',
+      amber: '#FEF3C7'
+    };
+    return colors[accent as keyof typeof colors] || colors.emerald;
   };
 
   return (
     <View className="flex-1 bg-stone-50">
-        <SafeAreaView>
+      <SafeAreaView edges={['top']} style={{ backgroundColor: getAccentColor() }}>
+        <View className="px-4 pb-4">
           <View className="flex-row items-center mb-2">
             <TouchableOpacity 
               onPress={() => router.back()}
-              className="w-12 h-12 bg-white/15 rounded-2xl items-center justify-center border-2 border-white/30 mr-4"
+              className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center mr-4"
             >
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <View className="flex-1">
               <Text className="text-3xl font-bold text-white">
-                🎁 {personName}'s Wishlist
+                {personName}'s Wishlist
               </Text>
-              <Text className="text-white/70 text-sm">
-                Find the perfect gift
+              <Text className="text-white/80 text-sm">
+                Find the perfect gift 🎁
               </Text>
             </View>
           </View>
-        </SafeAreaView>
+        </View>
+      </SafeAreaView>
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
@@ -99,60 +110,79 @@ export default function PersonWishlistScreen() {
           {wishlistItems.length === 0 ? (
             <View className="items-center py-20">
               <Text className="text-8xl mb-6">🎁</Text>
-              <Text className="text-2xl font-semibold text-stone-900 mb-2">
-                No items yet! 🎄
+              <Text className="text-2xl font-semibold text-stone-900 mb-2 text-center">
+                No items yet!
               </Text>
-              <Text className="text-stone-600 text-center">
-                {personName} hasn't added any items to their wishlist yet.
+              <Text className="text-stone-600 text-center px-6">
+                {personName} hasn't added any items to their wishlist yet. Check back soon!
               </Text>
             </View>
           ) : (
             <>
               {wishlistItems.map(item => (
-                <View key={item.id} className="bg-white border-2 border-stone-200 rounded-3xl p-6 mb-4">
-                  <View className="flex-row items-center mb-5">
-                    <Text className="text-7xl mr-5">{item.emoji || '🎁'}</Text>
+                <View 
+                  key={item.id} 
+                  className="bg-white rounded-3xl p-6 mb-4 border-2"
+                  style={{ borderColor: getBorderColor() }}
+                >
+                  <View className="flex-row items-start mb-5">
+                    <Text className="text-6xl mr-4">{item.emoji || '🎁'}</Text>
                     <View className="flex-1">
-                      <Text className="text-2xl font-bold text-stone-900">{item.productName}</Text>
+                      <Text className="text-2xl font-bold text-stone-900 mb-2">
+                        {item.productName}
+                      </Text>
                       {item.price && (
-                        <Text className="text-3xl font-bold mt-2" style={{ color: getAccentColor() }}>
+                        <Text 
+                          className="text-3xl font-bold mb-2" 
+                          style={{ color: getAccentColor() }}
+                        >
                           {item.price}
                         </Text>
                       )}
                       {item.notes && (
-                        <Text className="text-stone-600 mt-2">{item.notes}</Text>
+                        <View 
+                          className="rounded-xl p-3 mt-2"
+                          style={{ backgroundColor: getBgColor() }}
+                        >
+                          <Text className="text-stone-700 text-sm">
+                            💭 {item.notes}
+                          </Text>
+                        </View>
                       )}
                     </View>
                   </View>
+                  
                   <TouchableOpacity
                     onPress={() => handleBuyOnAmazon(item.productUrl)}
-                    className="py-5 rounded-xl items-center border-2 border-white/30 active:scale-95"
+                    className="py-5 rounded-xl items-center active:scale-95"
                     style={{ backgroundColor: getAccentColor() }}
                     activeOpacity={0.8}
                   >
                     <View className="flex-row items-center">
                       <Ionicons name="cart" size={24} color="#fff" />
                       <Text className="text-white font-bold text-lg ml-3">
-                        🎁 Buy on Amazon
+                        Buy on Amazon
                       </Text>
                       <Ionicons name="open-outline" size={20} color="#fff" style={{ marginLeft: 8 }} />
                     </View>
                   </TouchableOpacity>
-                  <Text className="text-stone-500 text-xs text-center mt-4 font-semibold">
-                    🎅 Opens Amazon with affiliate link • Supports our app
+                  
+                  <Text className="text-stone-500 text-xs text-center mt-3">
+                    Opens Amazon • Supports our app 🎅
                   </Text>
                 </View>
               ))}
             </>
           )}
 
-
+          <View className="bg-amber-50 rounded-2xl p-5 mb-4 border-2 border-amber-200">
             <View className="flex-row items-start">
-              <Text className="text-2xl mr-3">💡</Text>
-              <Text className="flex-1 text-stone-700 text-sm">
+              <Text className="text-2xl mr-3">🤫</Text>
+              <Text className="flex-1 text-amber-900 text-sm">
                 Remember to keep your gift a secret! The magic of Secret Santa is in the surprise. 🎅
               </Text>
             </View>
+          </View>
 
           <View className="h-20" />
         </ScrollView>
