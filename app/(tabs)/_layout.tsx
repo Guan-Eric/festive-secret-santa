@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 
 export default function TabLayout() {
   return (
@@ -23,36 +23,50 @@ export default function TabLayout() {
         name="(group)"
         options={{
           title: 'My Groups',
-          tabBarIcon: ({ color, focused }) => (
-            <View >
+          tabBarIcon: ({ color }) => (
+            <View>
               <Ionicons name="people" size={22} color={color} />
             </View>
           ),
-          tabBarLabel: ({ focused }) => focused ? '' : 'Groups',
+          tabBarLabel: ({ color }) => (
+            <Text style={{ color, fontSize: 12 }}>
+              Groups
+            </Text>
+          ),
         }}
       />
+
       <Tabs.Screen
         name="(search)"
         options={{
           title: 'Search Gifts',
-          tabBarIcon: ({ color, focused }) => (
-            <View >
+          tabBarIcon: ({ color }) => (
+            <View>
               <Ionicons name="search" size={22} color={color} />
             </View>
           ),
-          tabBarLabel: ({ focused }) => focused ? '' : 'Search',
+          tabBarLabel: ({ color }) => (
+            <Text style={{ color, fontSize: 12 }}>
+              Search
+            </Text>
+          ),
         }}
       />
+
       <Tabs.Screen
         name="(wishlist)"
         options={{
           title: 'My Wishlist',
-          tabBarIcon: ({ color, focused }) => (
-            <View >
+          tabBarIcon: ({ color }) => (
+            <View>
               <Ionicons name="heart" size={22} color={color} />
             </View>
           ),
-          tabBarLabel: ({ focused }) => focused ? '' : 'Wishlist',
+          tabBarLabel: ({ color }) => (
+            <Text style={{ color, fontSize: 12 }}>
+              Wishlist
+            </Text>
+          ),
         }}
       />
     </Tabs>

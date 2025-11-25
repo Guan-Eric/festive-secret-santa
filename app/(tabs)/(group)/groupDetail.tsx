@@ -1,11 +1,10 @@
-// app/(tabs)/(group)/groupDetail.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { auth, db } from '../../../firebase';
+import { auth } from '../../../firebase';
+import { getGroupById, updateGroupMatching } from '../../../services/groupService';
 import { matchSecretSantas } from '../../../services/secretSantaMatcher';
 import { Group } from '../../../types/index';
 
@@ -25,10 +24,8 @@ export default function GroupDetailScreen() {
     if (!groupId) return;
     
     try {
-      const groupDoc = await getDoc(doc(db, 'groups', groupId as string));
-      if (groupDoc.exists()) {
-        setGroup({ id: groupDoc.id, ...groupDoc.data() } as Group);
-      }
+      const groupData = await getGroupById(groupId as string);
+      setGroup(groupData);
     } catch (error) {
       console.error('Error loading group:', error);
       Alert.alert('Error', 'Failed to load group details');
@@ -55,12 +52,7 @@ export default function GroupDetailScreen() {
             setMatching(true);
             try {
               const assignments = matchSecretSantas(group.members);
-              
-              await updateDoc(doc(db, 'groups', group.id), {
-                matched: true,
-                assignments,
-              });
-
+              await updateGroupMatching(group.id, assignments);
               Alert.alert('🎅 Success!', 'Secret Santas have been matched! Everyone can now see their assignments.');
               loadGroup();
             } catch (error: any) {
@@ -110,30 +102,32 @@ export default function GroupDetailScreen() {
 
   return (
     <View className="flex-1 bg-stone-50">
-        <SafeAreaView>
-          <View className="flex-row items-center mb-4">
+      <SafeAreaView edges={['top']} className="bg-emerald-600">
+        <View className="px-4 pb-4">
+          <View className="flex-row items-center">
             <TouchableOpacity 
               onPress={() => router.back()}
-              className="w-12 h-12 bg-white/15 rounded-2xl items-center justify-center border-2 border-white/30 mr-4"
+              className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center mr-4"
             >
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <View className="flex-1">
-              <Text className="text-3xl font-bold text-white">
+              <Text className="text-2xl font-bold text-white">
                 {group.emoji} {group.name}
               </Text>
-              <Text className="text-white/70 text-sm">
+              <Text className="text-white/80 text-sm">
                 Group Details
               </Text>
             </View>
             <TouchableOpacity 
               onPress={handleShareGroup}
-              className="w-12 h-12 bg-white/15 rounded-2xl items-center justify-center border-2 border-white/30"
+              className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center"
             >
               <Ionicons name="share-outline" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
-        </SafeAreaView>
+        </View>
+      </SafeAreaView>
 
       <ScrollView className="flex-1 px-4 pt-6">
         {/* Group Info */}
@@ -224,7 +218,7 @@ export default function GroupDetailScreen() {
         )}
 
         {/* Invite Instructions */}
-       
+        <View className="bg-stone-100 rounded-2xl p-5 mb-4 border-2 border-stone-200">
           <View className="flex-row items-start">
             <Text className="text-2xl mr-3">💡</Text>
             <View className="flex-1">
@@ -232,14 +226,14 @@ export default function GroupDetailScreen() {
                 How to add members:
               </Text>
               <Text className="text-stone-700 text-sm">
-                1. Share this group using the share button above{'\n'}
-                2. Ask members to download the Secret Santa app{'\n'}
-                3. They can request to join using your email{'\n'}
+                1. Share this group using the share button above{"\n"}
+                2. Ask members to download the Secret Santa app{"\n"}
+                3. They can request to join using your email{"\n"}
                 4. Once everyone joins, match Secret Santas!
               </Text>
             </View>
           </View>
-   
+        </View>
 
         <View className="h-20" />
       </ScrollView>

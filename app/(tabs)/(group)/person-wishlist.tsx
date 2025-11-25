@@ -1,11 +1,9 @@
-// app/(tabs)/(group)/person-wishlist.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { db } from '../../../firebase';
+import { subscribeToPersonWishlist } from '../../../services/wishlistService';
 import { WishlistItem } from '../../../types/index';
 
 export default function PersonWishlistScreen() {
@@ -17,21 +15,14 @@ export default function PersonWishlistScreen() {
   useEffect(() => {
     if (!personId || !groupId) return;
 
-    const q = query(
-      collection(db, 'wishlistItems'),
-      where('userId', '==', personId),
-      where('groupId', '==', groupId)
+    const unsubscribe = subscribeToPersonWishlist(
+      personId as string,
+      groupId as string,
+      (items) => {
+        setWishlistItems(items);
+        setLoading(false);
+      }
     );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const items = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as WishlistItem[];
-      
-      setWishlistItems(items);
-      setLoading(false);
-    });
 
     return unsubscribe;
   }, [personId, groupId]);
@@ -81,7 +72,7 @@ export default function PersonWishlistScreen() {
     <View className="flex-1 bg-stone-50">
       <SafeAreaView edges={['top']} style={{ backgroundColor: getAccentColor() }}>
         <View className="px-4 pb-4">
-          <View className="flex-row items-center mb-2">
+          <View className="flex-row items-center">
             <TouchableOpacity 
               onPress={() => router.back()}
               className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center mr-4"
@@ -89,7 +80,7 @@ export default function PersonWishlistScreen() {
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <View className="flex-1">
-              <Text className="text-3xl font-bold text-white">
+              <Text className="text-2xl font-bold text-white">
                 {personName}'s Wishlist
               </Text>
               <Text className="text-white/80 text-sm">

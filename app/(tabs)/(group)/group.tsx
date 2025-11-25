@@ -1,10 +1,10 @@
-// app/(tabs)/(group)/group.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { auth, db } from '../../../firebase';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { auth } from '../../../firebase';
+import { subscribeToUserGroups } from '../../../services/groupService';
 import { Assignment, Group } from '../../../types/index';
 
 export default function GroupsScreen() {
@@ -16,18 +16,9 @@ export default function GroupsScreen() {
   useEffect(() => {
     if (!userId) return;
 
-    const q = query(
-      collection(db, 'groups'),
-      where('memberIds', 'array-contains', userId)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const groupsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Group[];
-      
+    const unsubscribe = subscribeToUserGroups(userId, (groupsData) => {
       setGroups(groupsData);
+console.log(groups)
     });
 
     return unsubscribe;
@@ -72,23 +63,29 @@ export default function GroupsScreen() {
 
   return (
     <View className="flex-1 bg-stone-50">
-      <ScrollView className="flex-1 px-4 pt-4">
-        <View className="mb-6">
-          <Text className="text-3xl font-bold text-stone-900 mb-2">
+      <SafeAreaView edges={['top']} className="bg-emerald-600">
+        <View className="px-4 pb-4">
+          <Text className="text-3xl font-bold text-white mb-1">
             My Groups
           </Text>
-          <Text className="text-base text-stone-600">
-            Your gift exchanges
+          <Text className="text-white/80 text-base">
+            Your gift exchanges 🎁
           </Text>
         </View>
+      </SafeAreaView>
 
+      <ScrollView className="flex-1 px-4 pt-6">
         {groups.length === 0 ? (
           <View className="items-center py-20">
-            <Text className="text-8xl mb-6">🎁</Text>
+            <Image
+              source={require('../../../assets/images/secret-santa-logo.png')}
+              style={{ width: 100, height: 100, marginBottom: 24 }}
+              resizeMode="contain"
+            />
             <Text className="text-2xl font-semibold text-stone-900 mb-2">
               No groups yet! 🎄
             </Text>
-            <Text className="text-stone-600 text-center mb-6">
+            <Text className="text-stone-600 text-center mb-6 px-8">
               Create a group to start your Secret Santa exchange
             </Text>
             <TouchableOpacity

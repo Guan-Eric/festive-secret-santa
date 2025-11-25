@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth } from '../firebase';
 
 export default function LoginScreen() {
@@ -97,7 +98,7 @@ export default function LoginScreen() {
               className="py-4"
             >
               <Text className="text-stone-700 text-center text-base">
-                Don't have an account?{' '}
+                Don't have an account?
                 <Text className="font-bold text-emerald-700">
                   Sign up
                 </Text>

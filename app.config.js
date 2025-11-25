@@ -4,7 +4,7 @@ export default {
     slug: "secret-santa-wishlist",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
+    icon: "./assets/images/secret-santa-icon.jpg",
     scheme: "festivesecretsanta",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
@@ -27,7 +27,7 @@ export default {
     },
     web: {
       output: "static",
-      favicon: "./assets/images/favicon.png"
+      favicon: "./assets/images/sectet-santa-logo.jpg"
     },
     plugins: [
       "expo-web-browser",
@@ -35,7 +35,7 @@ export default {
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/splash-icon.png",
+          image: "./assets/images/sectet-santa-logo.png",
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#ffffff",

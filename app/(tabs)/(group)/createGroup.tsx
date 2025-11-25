@@ -2,7 +2,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth } from '../../../firebase';
 import { createGroup } from '../../../services/groupService';
@@ -32,7 +32,7 @@ export default function CreateGroupScreen() {
 
   const handleCreateGroup = async () => {
     if (!groupName.trim()) {
-      alert('Please enter a group name! 🎄');
+      Alert.alert('Missing Group Name', 'Please enter a group name! 🎄');
       return;
     }
 
@@ -41,22 +41,36 @@ export default function CreateGroupScreen() {
       const userId = auth.currentUser?.uid;
       if (!userId) throw new Error('Not authenticated');
 
-      const validEmails = emails.filter(e => e.trim() !== '');
+      // Filter out empty emails and validate
+      const validEmails = emails
+        .map(e => e.trim())
+        .filter(e => e !== '');
 
-      await createGroup({
-        name: groupName,
-        budget: Number(budget) || undefined,
-        exchangeDate: exchangeDate || undefined,
+      const groupData = {
+        name: groupName.trim(),
+        budget: budget.trim() ? Number(budget) : null,
+        exchangeDate: exchangeDate.trim() || null,
         createdBy: userId,
         memberEmails: validEmails,
         creatorName: auth.currentUser?.displayName || 'You'
-      });
+      };
+
+      await createGroup(groupData);
       
-      alert('🎅 Group created successfully! Ho ho ho!');
-      router.back();
+      Alert.alert(
+        '🎅 Success!',
+        'Your Secret Santa group has been created! Ho ho ho!',
+        [
+          { text: 'OK', onPress: () => router.back() }
+        ]
+      );
     } catch (error) {
       console.error('Error creating group:', error);
-      alert('Error creating group. Please try again.');
+      Alert.alert(
+        'Error',
+        'Failed to create group. Please try again.',
+        [{ text: 'OK' }]
+      );
     } finally {
       setLoading(false);
     }
@@ -66,7 +80,7 @@ export default function CreateGroupScreen() {
     <View className="flex-1 bg-stone-50">
       <SafeAreaView edges={['top']} className="bg-emerald-600">
         <View className="px-4 pb-4">
-          <View className="flex-row items-center mb-2">
+          <View className="flex-row items-center">
             <TouchableOpacity 
               onPress={() => router.back()}
               className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center mr-4"
@@ -88,8 +102,8 @@ export default function CreateGroupScreen() {
       <ScrollView className="flex-1 px-4 pt-6">
         {/* Group Name */}
         <View className="mb-6">
-          <Text className="text-stone-900 font-bold text-sm mb-3 ml-2">
-            GROUP NAME *
+          <Text className="text-stone-700 font-bold text-sm mb-3 ml-1 uppercase tracking-wider">
+            Group Name *
           </Text>
           <View className="bg-white border-2 border-stone-200 rounded-2xl px-5 py-4">
             <TextInput
@@ -104,11 +118,11 @@ export default function CreateGroupScreen() {
 
         {/* Budget */}
         <View className="mb-6">
-          <Text className="text-stone-900 font-bold text-sm mb-3 ml-2">
-            BUDGET (OPTIONAL)
+          <Text className="text-stone-700 font-bold text-sm mb-3 ml-1 uppercase tracking-wider">
+            Budget (Optional)
           </Text>
           <View className="bg-white border-2 border-stone-200 rounded-2xl px-5 py-4 flex-row items-center">
-            <Text className="text-stone-900 text-lg font-bold mr-2">$</Text>
+            <Text className="text-stone-900 text-xl font-bold mr-2">$</Text>
             <TextInput
               placeholder="e.g., 50"
               placeholderTextColor="#A8A29E"
@@ -118,12 +132,15 @@ export default function CreateGroupScreen() {
               className="flex-1 text-stone-900 text-lg"
             />
           </View>
+          <Text className="text-stone-500 text-xs mt-2 ml-1">
+            Set a spending limit for gifts
+          </Text>
         </View>
 
         {/* Exchange Date */}
         <View className="mb-6">
-          <Text className="text-stone-900 font-bold text-sm mb-3 ml-2">
-            EXCHANGE DATE (OPTIONAL)
+          <Text className="text-stone-700 font-bold text-sm mb-3 ml-1 uppercase tracking-wider">
+            Exchange Date (Optional)
           </Text>
           <View className="bg-white border-2 border-stone-200 rounded-2xl px-5 py-4">
             <TextInput
@@ -134,12 +151,18 @@ export default function CreateGroupScreen() {
               className="text-stone-900 text-lg"
             />
           </View>
+          <Text className="text-stone-500 text-xs mt-2 ml-1">
+            When will you exchange gifts?
+          </Text>
         </View>
 
         {/* Email Invitations */}
         <View className="mb-6">
-          <Text className="text-stone-900 font-bold text-sm mb-3 ml-2">
-            INVITE PARTICIPANTS (OPTIONAL)
+          <Text className="text-stone-700 font-bold text-sm mb-3 ml-1 uppercase tracking-wider">
+            Invite Participants (Optional)
+          </Text>
+          <Text className="text-stone-500 text-xs mb-3 ml-1">
+            Add email addresses of people you want to invite
           </Text>
           {emails.map((email, index) => (
             <View key={index} className="mb-3 flex-row items-center">
@@ -151,15 +174,17 @@ export default function CreateGroupScreen() {
                   onChangeText={(value) => updateEmail(index, value)}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  autoCorrect={false}
                   className="text-stone-900 text-lg"
                 />
               </View>
               {emails.length > 1 && (
                 <TouchableOpacity
                   onPress={() => removeEmail(index)}
-                  className="ml-3 w-12 h-12 bg-red-50 rounded-xl items-center justify-center border-2 border-red-200"
+                  className="ml-3 w-12 h-12 bg-red-50 rounded-xl items-center justify-center border-2 border-red-200 active:scale-95"
+                  activeOpacity={0.7}
                 >
-                  <Ionicons name="trash" size={20} color="#EF4444" />
+                  <Ionicons name="trash-outline" size={20} color="#EF4444" />
                 </TouchableOpacity>
               )}
             </View>
@@ -167,8 +192,12 @@ export default function CreateGroupScreen() {
           <TouchableOpacity
             onPress={addEmailField}
             className="bg-white border-2 border-dashed border-stone-300 rounded-2xl py-4 items-center active:scale-95"
+            activeOpacity={0.7}
           >
-            <Text className="text-stone-600 font-bold">+ Add Another Email</Text>
+            <View className="flex-row items-center">
+              <Ionicons name="add-circle-outline" size={20} color="#78716C" />
+              <Text className="text-stone-600 font-bold ml-2">Add Another Email</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -176,9 +205,14 @@ export default function CreateGroupScreen() {
         <View className="bg-emerald-50 rounded-2xl p-5 mb-6 border-2 border-emerald-200">
           <View className="flex-row items-start">
             <Text className="text-2xl mr-3">💡</Text>
-            <Text className="flex-1 text-emerald-900 text-sm">
-              You can add participants now or invite them later. Once everyone joins, you can match Secret Santas! 🎅
-            </Text>
+            <View className="flex-1">
+              <Text className="text-emerald-900 font-bold mb-1">
+                How it works:
+              </Text>
+              <Text className="text-emerald-800 text-sm">
+                You can invite participants now or add them later. Once everyone joins, you'll be able to match Secret Santas! 🎅
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -189,9 +223,21 @@ export default function CreateGroupScreen() {
           className="bg-emerald-600 py-5 rounded-2xl items-center mb-8 active:scale-95"
           activeOpacity={0.8}
         >
-          <Text className="text-white font-bold text-xl">
-            {loading ? '🎅 Creating...' : '🎁 Create Group'}
-          </Text>
+          {loading ? (
+            <View className="flex-row items-center">
+              <ActivityIndicator color="#fff" />
+              <Text className="text-white font-bold text-xl ml-3">
+                Creating...
+              </Text>
+            </View>
+          ) : (
+            <View className="flex-row items-center">
+              <Ionicons name="gift" size={24} color="#fff" />
+              <Text className="text-white font-bold text-xl ml-3">
+                Create Group
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
 
         <View className="h-20" />

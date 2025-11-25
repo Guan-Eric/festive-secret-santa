@@ -1,163 +1,337 @@
 // app/(tabs)/(search)/search.tsx
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Picker } from '@react-native-picker/picker';
+import Constants from 'expo-constants';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth } from '../../../firebase';
-import { searchAmazonProducts } from '../../../services/amazonAPI';
+import { subscribeToUserGroups } from '../../../services/groupService';
 import { addWishlistItem } from '../../../services/wishlistService';
-import { AmazonProduct } from '../../../types/index';
+import { Group } from '../../../types/index';
+
+const AMAZON_ASSOCIATE_TAG = Constants.expoConfig?.extra?.amazonAssociateTag;
 
 export default function SearchScreen() {
-  const { groupId } = useLocalSearchParams();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [products, setProducts] = useState<AmazonProduct[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [adding, setAdding] = useState<string | null>(null);
+  const params = useLocalSearchParams();
+  const [selectedGroup, setSelectedGroup] = useState(params.groupId as string || '');
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [manualProductName, setManualProductName] = useState('');
+  const [amazonUrl, setAmazonUrl] = useState('');
+  const [manualPrice, setManualPrice] = useState('');
+  const [manualNotes, setManualNotes] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const userId = auth.currentUser?.uid;
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      Alert.alert('Enter Search Term', 'Please enter something to search for!');
-      return;
-    }
+  // Load user's groups
+  useEffect(() => {
+    if (!userId) return;
 
-    setLoading(true);
-    try {
-      const results = await searchAmazonProducts(searchQuery);
-      setProducts(results);
-    } catch (error) {
-      console.error('Search error:', error);
-      Alert.alert('Error', 'Failed to search products. Please try again.');
-    } finally {
+    const unsubscribe = subscribeToUserGroups(userId, (groupsData) => {
+      setGroups(groupsData);
       setLoading(false);
+      
+      // If groupId was passed in params, use it
+      if (params.groupId) {
+        setSelectedGroup(params.groupId as string);
+      }
+    });
+
+    return unsubscribe;
+  }, [userId]);
+
+  const addAffiliateTag = (url: string): string => {
+    if (!url.trim()) return '';
+    
+    try {
+      const urlObj = new URL(url);
+      
+      // Check if it's an Amazon URL
+      if (!urlObj.hostname.includes('amazon.com')) {
+        return url;
+      }
+
+      // Add or update the tag parameter
+      urlObj.searchParams.set('tag', AMAZON_ASSOCIATE_TAG);
+      return urlObj.toString();
+    } catch (error) {
+      // If URL parsing fails, just append the tag
+      return url.includes('?') 
+        ? `${url}&tag=${AMAZON_ASSOCIATE_TAG}`
+        : `${url}?tag=${AMAZON_ASSOCIATE_TAG}`;
     }
   };
 
-  const handleAddToWishlist = async (product: AmazonProduct) => {
-    if (!groupId) {
-      Alert.alert('Error', 'No group selected');
+  const handleAddManualItem = async () => {
+    if (!selectedGroup) {
+      Alert.alert('Select a Group', 'Please select a group first');
       return;
     }
 
-    setAdding(product.id);
+    if (!manualProductName.trim()) {
+      Alert.alert('Missing Product Name', 'Please enter a product name');
+      return;
+    }
+
+    if (!amazonUrl.trim()) {
+      Alert.alert('Missing Amazon URL', 'Please enter an Amazon product URL');
+      return;
+    }
+
+    if (!userId) {
+      Alert.alert('Error', 'You must be logged in');
+      return;
+    }
+
+    setAdding(true);
     try {
-      const userId = auth.currentUser?.uid;
-      if (!userId) throw new Error('Not authenticated');
+      const affiliateUrl = addAffiliateTag(amazonUrl);
 
       await addWishlistItem({
         userId,
-        groupId: groupId as string,
-        productName: product.title,
-        productUrl: product.affiliateUrl,
-        productImage: product.image ?? undefined,
-        price: product.price,
-        asin: product.asin,
+        groupId: selectedGroup,
+        productName: manualProductName.trim(),
+        productUrl: affiliateUrl,
+        price: manualPrice.trim() || undefined,
+        notes: manualNotes.trim() || undefined,
         emoji: '🎁',
       });
 
-      Alert.alert('Added!', `${product.title} has been added to your wishlist! 🎁`, [
-        { text: 'Add More', style: 'cancel' },
-        { text: 'View Wishlist', onPress: () => router.back() }
-      ]);
+      Alert.alert(
+        'Added! 🎁', 
+        `${manualProductName} has been added to your wishlist!`,
+        [
+          { 
+            text: 'Add Another', 
+            style: 'cancel',
+            onPress: () => {
+              // Clear form but keep group selected
+              setManualProductName('');
+              setAmazonUrl('');
+              setManualPrice('');
+              setManualNotes('');
+            }
+          },
+          { 
+            text: 'View Wishlist', 
+            onPress: () => router.push('/(tabs)/(wishlist)/wishlist')
+          }
+        ]
+      );
+
+      // Clear form
+      setManualProductName('');
+      setAmazonUrl('');
+      setManualPrice('');
+      setManualNotes('');
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
+      console.error('Error adding item:', error);
       Alert.alert('Error', 'Failed to add item to wishlist');
     } finally {
-      setAdding(null);
+      setAdding(false);
     }
   };
 
+  const handleBrowseAmazon = () => {
+    Alert.alert(
+      '🎁 How to Add Items',
+      '1. Open Amazon in your browser\n2. Find a product you want\n3. Copy the product URL\n4. Paste it here along with the product name',
+      [{ text: 'Got it!' }]
+    );
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-stone-50 items-center justify-center">
+        <ActivityIndicator size="large" color="#059669" />
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-stone-50">
-    
-        <SafeAreaView>
-          <View className="flex-row items-center mb-4">
+      <SafeAreaView edges={['top']} className="bg-emerald-600">
+        <View className="px-4 pb-4">
+          <View className="flex-row items-center">
             <TouchableOpacity 
               onPress={() => router.back()}
-              className="w-12 h-12 bg-white/15 rounded-2xl items-center justify-center border-2 border-white/30 mr-4"
+              className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center mr-4"
             >
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <View className="flex-1">
               <Text className="text-3xl font-bold text-white">
-                🔔 Search Gifts
+                Add to Wishlist
               </Text>
-              <Text className="text-white/70 text-sm">
-                Find the perfect presents
+              <Text className="text-white/80 text-sm">
+                Add items from Amazon 🎁
               </Text>
             </View>
           </View>
-
-          {/* Search Bar */}
-          <View className="flex-row items-center bg-white rounded-2xl px-5 py-4 border-2 border-stone-200">
-            <Ionicons name="search" size={24} color="#78716C" />
-            <TextInput
-              placeholder="Search for gifts..."
-              placeholderTextColor="#A8A29E"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onSubmitEditing={handleSearch}
-              returnKeyType="search"
-              className="flex-1 text-stone-900 text-lg ml-3"
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={24} color="#A8A29E" />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          <TouchableOpacity
-            onPress={handleSearch}
-            disabled={loading}
-            className="bg-white py-4 rounded-2xl items-center mt-4 active:scale-95 border-2 border-emerald-200"
-            activeOpacity={0.8}
-          >
-            {loading ? (
-              <ActivityIndicator color="#065f46" />
-            ) : (
-              <Text className="text-emerald-700 font-bold text-lg">
-                🎁 Search Amazon
-              </Text>
-            )}
-          </TouchableOpacity>
-        </SafeAreaView>
+        </View>
+      </SafeAreaView>
 
       <ScrollView className="flex-1 px-4 pt-6">
-        {products.length === 0 && !loading ? (
+        {/* Group Selector */}
+        <View className="bg-emerald-50 rounded-2xl p-5 mb-6 border-2 border-emerald-200">
+          <View className="flex-row items-center mb-4">
+            <View className="w-10 h-10 bg-emerald-600 rounded-xl items-center justify-center">
+              <Ionicons name="list" size={20} color="#fff" />
+            </View>
+            <Text className="text-sm font-bold text-emerald-900 uppercase tracking-wider ml-3">
+              Select Group
+            </Text>
+          </View>
+          <View className="bg-white border-2 border-emerald-300 rounded-xl overflow-hidden">
+            <Picker
+              selectedValue={selectedGroup}
+              onValueChange={setSelectedGroup}
+              style={{ color: '#1C1917' }}
+            >
+              <Picker.Item label="🎅 Select a group..." value="" />
+              {groups.map(group => (
+                <Picker.Item 
+                  key={group.id} 
+                  label={`${group.emoji} ${group.name}`} 
+                  value={group.id} 
+                />
+              ))}
+            </Picker>
+          </View>
+          {!selectedGroup && (
+            <Text className="text-emerald-700 text-xs mt-2 ml-1">
+              Choose which group this item is for
+            </Text>
+          )}
+        </View>
+
+        {!selectedGroup ? (
           <View className="items-center py-20">
             <Text className="text-8xl mb-6">🎁</Text>
             <Text className="text-2xl font-semibold text-stone-900 mb-2">
-              Search for gifts! 🎄
+              Select a Group First
             </Text>
-            <Text className="text-stone-600 text-center">
-              Enter a search term above to find perfect gifts on Amazon
+            <Text className="text-stone-600 text-center px-8">
+              Choose a group above to start adding items to your wishlist
             </Text>
           </View>
         ) : (
-          products.map(product => (
-            <View key={product.id} className="bg-white border-2 border-stone-200 rounded-3xl p-6 mb-4">
-              <View className="mb-4">
-                <Text className="text-xl font-bold text-stone-900 mb-2" numberOfLines={2}>
-                  {product.title}
-                </Text>
-                {product.price && product.price !== 'N/A' && (
-                  <Text className="text-3xl font-bold text-emerald-700">
-                    {product.price}
+          <>
+            {/* Instructions Card */}
+            <View className="bg-amber-50 rounded-2xl p-5 mb-6 border-2 border-amber-200">
+              <View className="flex-row items-start mb-3">
+                <Text className="text-3xl mr-3">💡</Text>
+                <View className="flex-1">
+                  <Text className="text-amber-900 font-bold text-lg mb-2">
+                    How to Add Items
                   </Text>
-                )}
+                  <Text className="text-amber-800 text-sm leading-5">
+                    1. Browse Amazon and find a product{'\n'}
+                    2. Copy the product URL{'\n'}
+                    3. Paste it below with the product name{'\n'}
+                    4. Your Secret Santa will see it on your wishlist!
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={handleBrowseAmazon}
+                className="bg-amber-600 py-3 rounded-xl items-center mt-2 active:scale-95"
+                activeOpacity={0.8}
+              >
+                <Text className="text-white font-bold">View Instructions</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Manual Entry Form */}
+            <View className="bg-white rounded-2xl p-6 mb-6 border-2 border-stone-200">
+              <Text className="text-xl font-bold text-stone-900 mb-5">
+                ✍️ Add Item Details
+              </Text>
+
+              {/* Product Name */}
+              <View className="mb-4">
+                <Text className="text-stone-700 font-semibold mb-2">
+                  Product Name *
+                </Text>
+                <View className="bg-stone-50 border-2 border-stone-200 rounded-xl px-4 py-3">
+                  <TextInput
+                    placeholder="e.g., Wireless Headphones"
+                    placeholderTextColor="#A8A29E"
+                    value={manualProductName}
+                    onChangeText={setManualProductName}
+                    className="text-stone-900 text-base"
+                  />
+                </View>
               </View>
 
+              {/* Amazon URL */}
+              <View className="mb-4">
+                <Text className="text-stone-700 font-semibold mb-2">
+                  Amazon Product URL *
+                </Text>
+                <View className="bg-stone-50 border-2 border-stone-200 rounded-xl px-4 py-3">
+                  <TextInput
+                    placeholder="https://www.amazon.com/..."
+                    placeholderTextColor="#A8A29E"
+                    value={amazonUrl}
+                    onChangeText={setAmazonUrl}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="url"
+                    className="text-stone-900 text-base"
+                  />
+                </View>
+              </View>
+
+              {/* Price (Optional) */}
+              <View className="mb-4">
+                <Text className="text-stone-700 font-semibold mb-2">
+                  Price (Optional)
+                </Text>
+                <View className="bg-stone-50 border-2 border-stone-200 rounded-xl px-4 py-3 flex-row items-center">
+                  <Text className="text-stone-900 text-lg font-bold mr-2">$</Text>
+                  <TextInput
+                    placeholder="29.99"
+                    placeholderTextColor="#A8A29E"
+                    value={manualPrice}
+                    onChangeText={setManualPrice}
+                    keyboardType="decimal-pad"
+                    className="flex-1 text-stone-900 text-base"
+                  />
+                </View>
+              </View>
+
+              {/* Notes (Optional) */}
+              <View className="mb-5">
+                <Text className="text-stone-700 font-semibold mb-2">
+                  Notes (Optional)
+                </Text>
+                <View className="bg-stone-50 border-2 border-stone-200 rounded-xl px-4 py-3">
+                  <TextInput
+                    placeholder="e.g., Prefer blue color, Size M"
+                    placeholderTextColor="#A8A29E"
+                    value={manualNotes}
+                    onChangeText={setManualNotes}
+                    multiline
+                    numberOfLines={3}
+                    className="text-stone-900 text-base"
+                    style={{ minHeight: 80, textAlignVertical: 'top' }}
+                  />
+                </View>
+              </View>
+
+              {/* Add Button */}
               <TouchableOpacity
-                onPress={() => handleAddToWishlist(product)}
-                disabled={adding === product.id}
+                onPress={handleAddManualItem}
+                disabled={adding}
                 className="py-4 rounded-xl items-center active:scale-95"
                 style={{ backgroundColor: '#059669' }}
                 activeOpacity={0.8}
               >
-                {adding === product.id ? (
+                {adding ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <View className="flex-row items-center">
@@ -169,18 +343,17 @@ export default function SearchScreen() {
                 )}
               </TouchableOpacity>
             </View>
-          ))
-        )}
 
-        {products.length > 0 && (
-          <View className="bg-amber-50 rounded-2xl p-4 mb-6 border-2 border-amber-200">
-            <View className="flex-row items-start">
-              <Text className="text-2xl mr-3">💡</Text>
-              <Text className="flex-1 text-amber-800 text-sm">
-                These products are from Amazon. When your Secret Santa buys through our affiliate links, it helps keep our app free! 🎅
-              </Text>
+            {/* Affiliate Disclosure */}
+            <View className="bg-emerald-50 rounded-2xl p-5 mb-6 border-2 border-emerald-200">
+              <View className="flex-row items-start">
+                <Text className="text-2xl mr-3">🎅</Text>
+                <Text className="flex-1 text-emerald-800 text-sm">
+                  When your Secret Santa buys through your Amazon links, we earn a small commission that helps keep the app free! Your affiliate tag is automatically added to all links.
+                </Text>
+              </View>
             </View>
-          </View>
+          </>
         )}
 
         <View className="h-20" />

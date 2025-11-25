@@ -14,7 +14,7 @@ function Index() {
         if (!user) {
           // No user - navigate after interactions complete
         
-            router.replace('/onboarding');
+            router.replace('/step1');
             setLoading(false);
  
           return;
@@ -24,7 +24,7 @@ function Index() {
       } catch (error) {
         console.error('Error in auth check:', error);
        
-          router.replace('/onboarding');
+          router.replace('/step1');
           setLoading(false);
   
       }

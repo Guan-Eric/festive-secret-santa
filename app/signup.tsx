@@ -111,7 +111,7 @@ export default function SignupScreen() {
               className="py-4"
             >
               <Text className="text-white text-center text-base">
-                Already have an account?{' '}
+                Already have an account?
                 <Text className="font-bold text-yellow-300">
                   Login 🎄
                 </Text>
