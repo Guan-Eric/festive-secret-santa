@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 export default function TabLayout() {
   return (
@@ -10,9 +10,6 @@ export default function TabLayout() {
           backgroundColor: '#fff',
           borderTopWidth: 2,
           borderTopColor: '#E7E5E4',
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 70,
         },
         tabBarActiveTintColor: '#065F46',
         tabBarInactiveTintColor: '#78716C',
@@ -23,15 +20,10 @@ export default function TabLayout() {
         name="(group)"
         options={{
           title: 'My Groups',
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color, size }) => (
             <View>
-              <Ionicons name="people" size={22} color={color} />
+              <Ionicons name="people" size={size} color={color} />
             </View>
-          ),
-          tabBarLabel: ({ color }) => (
-            <Text style={{ color, fontSize: 12 }}>
-              Groups
-            </Text>
           ),
         }}
       />
@@ -40,15 +32,10 @@ export default function TabLayout() {
         name="(search)"
         options={{
           title: 'Search Gifts',
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color, size }) => (
             <View>
-              <Ionicons name="search" size={22} color={color} />
+              <Ionicons name="search" size={size} color={color} />
             </View>
-          ),
-          tabBarLabel: ({ color }) => (
-            <Text style={{ color, fontSize: 12 }}>
-              Search
-            </Text>
           ),
         }}
       />
@@ -57,15 +44,10 @@ export default function TabLayout() {
         name="(wishlist)"
         options={{
           title: 'My Wishlist',
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color, size }) => (
             <View>
-              <Ionicons name="heart" size={22} color={color} />
+              <Ionicons name="heart" size={size} color={color} />
             </View>
-          ),
-          tabBarLabel: ({ color }) => (
-            <Text style={{ color, fontSize: 12 }}>
-              Wishlist
-            </Text>
           ),
         }}
       />

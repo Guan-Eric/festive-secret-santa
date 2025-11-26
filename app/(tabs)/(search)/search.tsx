@@ -1,10 +1,9 @@
 // app/(tabs)/(search)/search.tsx
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Picker } from '@react-native-picker/picker';
 import Constants from 'expo-constants';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth } from '../../../firebase';
 import { subscribeToUserGroups } from '../../../services/groupService';
@@ -23,6 +22,7 @@ export default function SearchScreen() {
   const [manualNotes, setManualNotes] = useState('');
   const [adding, setAdding] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [dropdownVisible, setDropdownVisible] = useState(false)
   const router = useRouter();
   const userId = auth.currentUser?.uid;
 
@@ -185,22 +185,27 @@ export default function SearchScreen() {
               Select Group
             </Text>
           </View>
-          <View className="bg-white border-2 border-emerald-300 rounded-xl overflow-hidden">
-            <Picker
-              selectedValue={selectedGroup}
-              onValueChange={setSelectedGroup}
-              style={{ color: '#1C1917' }}
-            >
-              <Picker.Item label="🎅 Select a group..." value="" />
-              {groups.map(group => (
-                <Picker.Item 
-                  key={group.id} 
-                  label={`${group.emoji} ${group.name}`} 
-                  value={group.id} 
-                />
-              ))}
-            </Picker>
-          </View>
+          
+          <TouchableOpacity
+            onPress={() => setDropdownVisible(true)}
+            className="bg-white border-2 border-emerald-300 rounded-xl px-5 py-4 flex-row items-center justify-between active:bg-stone-50"
+            activeOpacity={0.7}
+          >
+            {selectedGroup ? (
+              <View className="flex-row items-center flex-1">
+                <Text className="text-2xl mr-3">
+                  {groups.find(g => g.id === selectedGroup)?.emoji}
+                </Text>
+                <Text className="text-stone-900 text-base font-semibold flex-1">
+                  {groups.find(g => g.id === selectedGroup)?.name}
+                </Text>
+              </View>
+            ) : (
+              <Text className="text-stone-500 text-base">Select a group...</Text>
+            )}
+            <Ionicons name="chevron-down" size={20} color="#78716C" />
+          </TouchableOpacity>
+
           {!selectedGroup && (
             <Text className="text-emerald-700 text-xs mt-2 ml-1">
               Choose which group this item is for
@@ -208,9 +213,61 @@ export default function SearchScreen() {
           )}
         </View>
 
+        {/* Group Selection Modal */}
+        <Modal
+          visible={dropdownVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setDropdownVisible(false)}
+        >
+          <TouchableOpacity 
+            className="flex-1 bg-black/50"
+            activeOpacity={1}
+            onPress={() => setDropdownVisible(false)}
+          >
+            <View className="flex-1 justify-end">
+              <TouchableOpacity activeOpacity={1}>
+                <View className="bg-white rounded-t-3xl">
+                  <View className="px-6 py-5 border-b-2 border-stone-100 flex-row items-center justify-between">
+                    <Text className="text-xl font-bold text-stone-900">Select Group</Text>
+                    <TouchableOpacity onPress={() => setDropdownVisible(false)}>
+                      <Ionicons name="close" size={28} color="#57534E" />
+                    </TouchableOpacity>
+                  </View>
+                  <ScrollView className="max-h-96">
+                    {groups.map(group => (
+                      <TouchableOpacity
+                        key={group.id}
+                        onPress={() => {
+                          setSelectedGroup(group.id);
+                          setDropdownVisible(false);
+                        }}
+                        className="px-6 py-4 flex-row items-center border-b border-stone-100 active:bg-emerald-50"
+                        activeOpacity={0.7}
+                      >
+                        <Text className="text-3xl mr-4">{group.emoji}</Text>
+                        <Text className="text-stone-900 text-base font-semibold flex-1">
+                          {group.name}
+                        </Text>
+                        {selectedGroup === group.id && (
+                          <Ionicons name="checkmark-circle" size={24} color="#059669" />
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                  <View className="h-8" />
+                </View>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
         {!selectedGroup ? (
           <View className="items-center py-20">
-            <Text className="text-8xl mb-6">🎁</Text>
+            <Image
+              source={require('../../../assets/images/secret-santa-logo.png')}
+              style={{ width: 100, height: 100, marginBottom: 24 }}
+              resizeMode="contain"
+            />
             <Text className="text-2xl font-semibold text-stone-900 mb-2">
               Select a Group First
             </Text>

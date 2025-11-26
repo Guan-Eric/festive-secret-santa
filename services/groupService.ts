@@ -1,6 +1,8 @@
 // services/groupService.ts
 import {
   addDoc,
+  arrayRemove,
+  arrayUnion,
   collection,
   doc,
   getDoc,
@@ -12,7 +14,7 @@ import {
   where
 } from 'firebase/firestore';
 import { auth, db } from '../firebase';
-import { Assignment, Group, GroupMember } from '../types/index';
+import { Assignment, Group, GroupInvite, GroupMember } from '../types/index';
 
 /**
  * Create a new group
@@ -33,6 +35,7 @@ export const createGroup = async (groupData: Partial<Group>) => {
         userId,
         name: groupData.creatorName || auth.currentUser?.displayName || 'You'
       }] as GroupMember[],
+      pendingMemberIds: [],
       matched: false,
       createdAt: serverTimestamp(),
       emoji: ['🎄', '⛄', '🎁', '🔔', '⭐'][Math.floor(Math.random() * 5)],
@@ -212,6 +215,142 @@ export const removeMemberFromGroup = async (
     });
   } catch (error) {
     console.error('Error removing member from group:', error);
+    throw error;
+  }
+};
+
+  /**
+ * Send an invite to a user
+ */
+  export const sendGroupInvite = async (
+    groupId: string,
+    groupName: string,
+    groupEmoji: string,
+    invitedUserEmail: string,
+    invitedUserId: string, // ADD THIS PARAMETER
+    invitedByName: string,
+    invitedByUserId: string
+  ) => {
+    try {
+      // Create invite
+      const inviteData = {
+        groupId,
+        groupName,
+        groupEmoji,
+        invitedByName,
+        invitedByUserId,
+        invitedUserEmail: invitedUserEmail.toLowerCase(),
+        invitedUserId, // Store the user ID
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      };
+  
+      await addDoc(collection(db, 'groupInvites'), inviteData);
+      
+      // Add user to pendingMemberIds in the group
+      const groupRef = doc(db, 'groups', groupId);
+      await updateDoc(groupRef, {
+        pendingMemberIds: arrayUnion(invitedUserId)
+      });
+    } catch (error) {
+      console.error('Error sending invite:', error);
+      throw error;
+    }
+  };
+
+/**
+ * Get pending invites for a user
+ */
+export const getUserInvites = async (userEmail: string): Promise<GroupInvite[]> => {
+  try {
+    const q = query(
+      collection(db, 'groupInvites'),
+      where('invitedUserEmail', '==', userEmail.toLowerCase()),
+      where('status', '==', 'pending')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GroupInvite));
+  } catch (error) {
+    console.error('Error getting invites:', error);
+    throw error;
+  }
+};
+
+/**
+ * Subscribe to user's pending invites
+ */
+export const subscribeToUserInvites = (
+  userEmail: string,
+  callback: (invites: GroupInvite[]) => void
+) => {
+  const q = query(
+    collection(db, 'groupInvites'),
+    where('invitedUserEmail', '==', userEmail.toLowerCase()),
+    where('status', '==', 'pending')
+  );
+
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const invites = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    } as GroupInvite));
+    callback(invites);
+  }, (error) => {
+    console.error('Error in invites subscription:', error);
+  });
+
+  return unsubscribe;
+};
+
+/**
+ * Accept a group invite
+ */
+export const acceptGroupInvite = async (
+  inviteId: string,
+  groupId: string,
+  userId: string,
+  userName: string,
+  userEmail: string
+) => {
+  try {
+    // Update invite status
+    await updateDoc(doc(db, 'groupInvites', inviteId), {
+      status: 'accepted',
+    });
+
+    // Add user to group and remove from pending
+    const groupRef = doc(db, 'groups', groupId);
+    await updateDoc(groupRef, {
+      memberIds: arrayUnion(userId),
+      members: arrayUnion({
+        userId,
+        name: userName,
+        email: userEmail,
+      }),
+      pendingMemberIds: arrayRemove(userId)
+    });
+  } catch (error) {
+    console.error('Error accepting invite:', error);
+    throw error;
+  }
+};
+
+/**
+ * Decline a group invite
+ */
+export const declineGroupInvite = async (inviteId: string, groupId: string, userId: string) => {
+  try {
+    await updateDoc(doc(db, 'groupInvites', inviteId), {
+      status: 'declined',
+    });
+    
+    // Remove from pending members
+    const groupRef = doc(db, 'groups', groupId);
+    await updateDoc(groupRef, {
+      pendingMemberIds: arrayRemove(userId)
+    });
+  } catch (error) {
+    console.error('Error declining invite:', error);
     throw error;
   }
 };

@@ -18,6 +18,7 @@ export interface Group {
   memberEmails: string[];
   memberIds: string[];
   members: GroupMember[];
+  pendingMemberIds: string[];
   matched: boolean;
   assignments?: Assignment[];
   createdAt: Timestamp | Date;
@@ -25,6 +26,18 @@ export interface Group {
   colors?: string[];
   accent?: string;
   creatorName: string;
+}
+
+export interface GroupInvite {
+  id: string;
+  groupId: string;
+  groupName: string;
+  groupEmoji: string;
+  invitedByName: string;
+  invitedByUserId: string;
+  invitedUserEmail: string;
+  status: 'pending' | 'accepted' | 'declined';
+  createdAt: Timestamp | Date;
 }
 
 export interface GroupMember {

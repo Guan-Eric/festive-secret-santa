@@ -27,7 +27,7 @@ export default {
     },
     web: {
       output: "static",
-      favicon: "./assets/images/sectet-santa-logo.jpg"
+      favicon: "./assets/images/secret-santa-logo.png"
     },
     plugins: [
       "expo-web-browser",
@@ -35,7 +35,7 @@ export default {
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/sectet-santa-logo.png",
+          image: './assets/images/secret-santa-logo.png',
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#ffffff",

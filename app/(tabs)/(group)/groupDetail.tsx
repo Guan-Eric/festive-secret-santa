@@ -1,11 +1,13 @@
+// app/(tabs)/(group)/groupDetail.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, ScrollView, Share, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth } from '../../../firebase';
-import { getGroupById, updateGroupMatching } from '../../../services/groupService';
+import { getGroupById, sendGroupInvite, updateGroup, updateGroupMatching } from '../../../services/groupService';
 import { matchSecretSantas } from '../../../services/secretSantaMatcher';
+import { searchUsersByEmail } from '../../../services/userService';
 import { Group } from '../../../types/index';
 
 export default function GroupDetailScreen() {
@@ -13,6 +15,21 @@ export default function GroupDetailScreen() {
   const [group, setGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
   const [matching, setMatching] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [addMemberModalVisible, setAddMemberModalVisible] = useState(false);
+  
+  // Edit fields
+  const [editName, setEditName] = useState('');
+  const [editBudget, setEditBudget] = useState('');
+  const [editExchangeDate, setEditExchangeDate] = useState('');
+  const [saving, setSaving] = useState(false);
+  
+  // Add member fields
+  const [memberEmail, setMemberEmail] = useState('');
+  const [memberName, setMemberName] = useState('');
+  const [addingMember, setAddingMember] = useState(false);
+  const [searchingUser, setSearchingUser] = useState(false);
+  
   const router = useRouter();
   const userId = auth.currentUser?.uid;
 
@@ -26,11 +43,135 @@ export default function GroupDetailScreen() {
     try {
       const groupData = await getGroupById(groupId as string);
       setGroup(groupData);
+      if (groupData) {
+        setEditName(groupData.name);
+        setEditBudget(groupData.budget?.toString() || '');
+        setEditExchangeDate(groupData.exchangeDate || '');
+      }
     } catch (error) {
       console.error('Error loading group:', error);
       Alert.alert('Error', 'Failed to load group details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editName.trim()) {
+      Alert.alert('Missing Name', 'Please enter a group name');
+      return;
+    }
+
+    if (!group) return;
+
+    setSaving(true);
+    try {
+      await updateGroup(group.id, {
+        name: editName.trim(),
+        budget: editBudget.trim() ? Number(editBudget) : null,
+        exchangeDate: editExchangeDate.trim() || null,
+      });
+
+      Alert.alert('Success', 'Group details updated!');
+      setEditModalVisible(false);
+      loadGroup();
+    } catch (error) {
+      console.error('Error updating group:', error);
+      Alert.alert('Error', 'Failed to update group details');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSearchUser = async () => {
+    if (!memberEmail.trim()) {
+      Alert.alert('Missing Email', 'Please enter an email address');
+      return;
+    }
+
+    setSearchingUser(true);
+    try {
+      const users = await searchUsersByEmail(memberEmail.trim().toLowerCase());
+      
+      if (users.length === 0) {
+        Alert.alert(
+          'User Not Found',
+          'No user found with this email. They may need to sign up first.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      const user = users[0];
+      
+      // Check if already a member
+      if (group?.memberIds.includes(user.id)) {
+        Alert.alert('Already a Member', 'This user is already in the group');
+        return;
+      }
+
+      setMemberName(user.displayName);
+      Alert.alert(
+        'User Found',
+        `Found: ${user.displayName}. Click "Add Member" to add them to the group.`,
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error searching user:', error);
+      Alert.alert('Error', 'Failed to search for user');
+    } finally {
+      setSearchingUser(false);
+    }
+  };
+
+  const handleAddMember = async () => {
+    if (!memberEmail.trim() || !memberName.trim()) {
+      Alert.alert('Missing Information', 'Please search for a user first');
+      return;
+    }
+  
+    if (!group) return;
+  
+    if (group.matched) {
+      Alert.alert(
+        'Cannot Add Members',
+        'Secret Santas have already been matched. You cannot add new members after matching.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+  
+    setAddingMember(true);
+    try {
+      const users = await searchUsersByEmail(memberEmail.trim().toLowerCase());
+      
+      if (users.length === 0) {
+        Alert.alert('Error', 'User not found');
+        return;
+      }
+  
+      const user = users[0];
+  
+      // Send invite with user ID
+      await sendGroupInvite(
+        group.id,
+        group.name,
+        group.emoji,
+        user.email,
+        user.id, // Pass user ID
+        auth.currentUser?.displayName || 'Someone',
+        userId!
+      );
+  
+      Alert.alert('Invite Sent!', `An invitation has been sent to ${user.displayName}. They will need to accept it to join the group.`);
+      setAddMemberModalVisible(false);
+      setMemberEmail('');
+      setMemberName('');
+    } catch (error) {
+      console.error('Error sending invite:', error);
+      Alert.alert('Error', 'Failed to send invite');
+    } finally {
+      setAddingMember(false);
     }
   };
 
@@ -74,7 +215,8 @@ export default function GroupDetailScreen() {
       await Share.share({
         message: `🎄 You're invited to join "${group.name}" Secret Santa exchange!\n\n` +
                  `Join the festive fun and surprise your friends with the perfect gift! 🎁\n\n` +
-                 `Download the Secret Santa app to join!`,
+                 `Created by: ${group.creatorName}\n\n` +
+                 `Download the Secret Santa app and search for this group to join!`,
         title: `Join ${group.name}`,
       });
     } catch (error) {
@@ -132,16 +274,38 @@ export default function GroupDetailScreen() {
       <ScrollView className="flex-1 px-4 pt-6">
         {/* Group Info */}
         <View className="bg-white rounded-2xl p-6 mb-4 border-2 border-stone-200">
-          <Text className="text-sm text-stone-500 uppercase tracking-wider mb-4">
-            Group Information
-          </Text>
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-sm text-stone-500 uppercase tracking-wider">
+              Group Information
+            </Text>
+            {isCreator && !group.matched && (
+              <TouchableOpacity
+                onPress={() => setEditModalVisible(true)}
+                className="flex-row items-center bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200"
+              >
+                <Ionicons name="pencil" size={16} color="#059669" />
+                <Text className="text-emerald-700 font-semibold ml-1 text-xs">Edit</Text>
+              </TouchableOpacity>
+            )}
+          </View>
           
           <View className="mb-4">
-            <View className="flex-row items-center mb-2">
-              <Ionicons name="people" size={20} color="#78716C" />
-              <Text className="text-stone-900 font-semibold ml-2">
-                {group.members.length} Participants
-              </Text>
+            <View className="flex-row items-center justify-between mb-2">
+              <View className="flex-row items-center flex-1">
+                <Ionicons name="people" size={20} color="#78716C" />
+                <Text className="text-stone-900 font-semibold ml-2">
+                  {group.members.length} Participants
+                </Text>
+              </View>
+              {isCreator && !group.matched && (
+                <TouchableOpacity
+                  onPress={() => setAddMemberModalVisible(true)}
+                  className="flex-row items-center bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200"
+                >
+                  <Ionicons name="person-add" size={16} color="#059669" />
+                  <Text className="text-emerald-700 font-semibold ml-1 text-xs">Add</Text>
+                </TouchableOpacity>
+              )}
             </View>
             {group.members.map((member, index) => (
               <Text key={index} className="text-stone-600 ml-7">
@@ -217,19 +381,26 @@ export default function GroupDetailScreen() {
           </View>
         )}
 
-        {/* Invite Instructions */}
+        {/* Instructions */}
         <View className="bg-stone-100 rounded-2xl p-5 mb-4 border-2 border-stone-200">
           <View className="flex-row items-start">
             <Text className="text-2xl mr-3">💡</Text>
             <View className="flex-1">
               <Text className="text-stone-900 font-bold mb-2">
-                How to add members:
+                How to invite members:
               </Text>
               <Text className="text-stone-700 text-sm">
-                1. Share this group using the share button above{"\n"}
-                2. Ask members to download the Secret Santa app{"\n"}
-                3. They can request to join using your email{"\n"}
-                4. Once everyone joins, match Secret Santas!
+                {isCreator ? (
+                  <>1. Click "Add" button above to add members by email{'\n'}
+                  2. Or share this group using the share button{'\n'}
+                  3. Members need to sign up with the app first{'\n'}
+                  4. Once everyone joins, match Secret Santas!</>
+                ) : (
+                  <>1. Only the creator can add members{'\n'}
+                  2. Share the group link with the creator{'\n'}
+                  3. They can add you using your email{'\n'}
+                  4. Wait for Secret Santa matching!</>
+                )}
               </Text>
             </View>
           </View>
@@ -237,6 +408,175 @@ export default function GroupDetailScreen() {
 
         <View className="h-20" />
       </ScrollView>
+
+      {/* Edit Modal */}
+      <Modal
+        visible={editModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <SafeAreaView edges={['top']} className="flex-1 bg-stone-50">
+          <View className="px-4 py-4 border-b-2 border-stone-200 bg-white">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-2xl font-bold text-stone-900">Edit Group</Text>
+              <TouchableOpacity onPress={() => setEditModalVisible(false)}>
+                <Ionicons name="close" size={28} color="#57534E" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <ScrollView className="flex-1 px-4 pt-6">
+            <View className="mb-6">
+              <Text className="text-stone-700 font-bold text-sm mb-3 ml-1 uppercase tracking-wider">
+                Group Name *
+              </Text>
+              <View className="bg-white border-2 border-stone-200 rounded-2xl px-5 py-4">
+                <TextInput
+                  placeholder="Group name"
+                  placeholderTextColor="#A8A29E"
+                  value={editName}
+                  onChangeText={setEditName}
+                  className="text-stone-900 text-lg"
+                />
+              </View>
+            </View>
+
+            <View className="mb-6">
+              <Text className="text-stone-700 font-bold text-sm mb-3 ml-1 uppercase tracking-wider">
+                Budget (Optional)
+              </Text>
+              <View className="bg-white border-2 border-stone-200 rounded-2xl px-5 py-4 flex-row items-center">
+                <Text className="text-stone-900 text-xl font-bold mr-2">$</Text>
+                <TextInput
+                  placeholder="e.g., 50"
+                  placeholderTextColor="#A8A29E"
+                  value={editBudget}
+                  onChangeText={setEditBudget}
+                  keyboardType="numeric"
+                  className="flex-1 text-stone-900 text-lg"
+                />
+              </View>
+            </View>
+
+            <View className="mb-6">
+              <Text className="text-stone-700 font-bold text-sm mb-3 ml-1 uppercase tracking-wider">
+                Exchange Date (Optional)
+              </Text>
+              <View className="bg-white border-2 border-stone-200 rounded-2xl px-5 py-4">
+                <TextInput
+                  placeholder="e.g., December 25, 2025"
+                  placeholderTextColor="#A8A29E"
+                  value={editExchangeDate}
+                  onChangeText={setEditExchangeDate}
+                  className="text-stone-900 text-lg"
+                />
+              </View>
+            </View>
+
+            <TouchableOpacity
+              onPress={handleSaveEdit}
+              disabled={saving}
+              className="bg-emerald-600 py-5 rounded-2xl items-center mb-8 active:scale-95"
+              activeOpacity={0.8}
+            >
+              {saving ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text className="text-white font-bold text-xl">Save Changes</Text>
+              )}
+            </TouchableOpacity>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+
+      {/* Add Member Modal */}
+      <Modal
+        visible={addMemberModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setAddMemberModalVisible(false)}
+      >
+        <SafeAreaView edges={['top']} className="flex-1 bg-stone-50">
+          <View className="px-4 py-4 border-b-2 border-stone-200 bg-white">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-2xl font-bold text-stone-900">Add Member</Text>
+              <TouchableOpacity onPress={() => setAddMemberModalVisible(false)}>
+                <Ionicons name="close" size={28} color="#57534E" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <ScrollView className="flex-1 px-4 pt-6">
+            <View className="bg-amber-50 rounded-2xl p-5 mb-6 border-2 border-amber-200">
+              <View className="flex-row items-start">
+                <Text className="text-2xl mr-3">💡</Text>
+                <Text className="flex-1 text-amber-900 text-sm">
+                  The person must have signed up for the app first. Enter their email to search for them.
+                </Text>
+              </View>
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-stone-700 font-bold text-sm mb-3 ml-1 uppercase tracking-wider">
+                Member Email *
+              </Text>
+              <View className="bg-white border-2 border-stone-200 rounded-2xl px-5 py-4">
+                <TextInput
+                  placeholder="email@example.com"
+                  placeholderTextColor="#A8A29E"
+                  value={memberEmail}
+                  onChangeText={setMemberEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  className="text-stone-900 text-lg"
+                />
+              </View>
+            </View>
+
+            <TouchableOpacity
+              onPress={handleSearchUser}
+              disabled={searchingUser}
+              className="bg-emerald-600 py-4 rounded-xl items-center mb-4 active:scale-95"
+              activeOpacity={0.8}
+            >
+              {searchingUser ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <View className="flex-row items-center">
+                  <Ionicons name="search" size={20} color="#fff" />
+                  <Text className="text-white font-bold text-lg ml-2">Search User</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            {memberName && (
+              <View className="bg-emerald-50 rounded-2xl p-5 mb-4 border-2 border-emerald-200">
+                <Text className="text-emerald-900 font-bold mb-1">User Found:</Text>
+                <Text className="text-emerald-800">{memberName}</Text>
+              </View>
+            )}
+
+            {memberName && (
+              <TouchableOpacity
+                onPress={handleAddMember}
+                disabled={addingMember}
+                className="bg-emerald-600 py-5 rounded-2xl items-center mb-8 active:scale-95"
+                activeOpacity={0.8}
+              >
+                {addingMember ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <View className="flex-row items-center">
+                    <Ionicons name="person-add" size={20} color="#fff" />
+                    <Text className="text-white font-bold text-xl ml-2">Add Member</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            )}
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 }

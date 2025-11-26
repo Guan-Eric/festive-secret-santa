@@ -11,7 +11,7 @@ export default function OnboardingStep1() {
     <View className="flex-1" style={{ backgroundColor: '#ECFDF5' }}>
       <SafeAreaView className="flex-1">
         {/* Skip Button */}
-        <View className="absolute top-4 right-6 z-10">
+        <View className="absolute top-16 right-6 z-10">
           <TouchableOpacity 
             onPress={() => router.replace('/login')}
             className="bg-white/80 px-5 py-2 rounded-full"
@@ -22,12 +22,7 @@ export default function OnboardingStep1() {
 
         {/* Content */}
         <View className="flex-1 justify-center items-center px-8">
-          {/* Emoji Illustration */}
-          <View className="mb-8">
-            <Text className="text-9xl text-center">🎁</Text>
-          </View>
-
-          {/* Icon Badge */}
+                    {/* Icon Badge */}
           <View 
             className="rounded-2xl p-4 mb-8"
             style={{ backgroundColor: '#059669' }}

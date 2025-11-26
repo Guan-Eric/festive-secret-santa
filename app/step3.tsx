@@ -11,7 +11,7 @@ export default function OnboardingStep3() {
     <View className="flex-1" style={{ backgroundColor: '#FFFBEB' }}>
       <SafeAreaView className="flex-1">
         {/* Back Button */}
-        <View className="absolute top-4 left-6 z-10">
+        <View className="absolute top-16 left-6 z-10">
           <TouchableOpacity 
             onPress={() => router.back()}
             className="w-12 h-12 bg-white/80 rounded-full items-center justify-center"
@@ -22,11 +22,6 @@ export default function OnboardingStep3() {
 
         {/* Content */}
         <View className="flex-1 justify-center items-center px-8">
-          {/* Emoji Illustration */}
-          <View className="mb-8">
-            <Text className="text-9xl text-center">🛒</Text>
-          </View>
-
           {/* Icon Badge */}
           <View 
             className="rounded-2xl p-4 mb-8"
