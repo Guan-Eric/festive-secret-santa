@@ -278,7 +278,7 @@ export default function GroupDetailScreen() {
             <Text className="text-sm text-stone-500 uppercase tracking-wider">
               Group Information
             </Text>
-            {isCreator && !group.matched && (
+            {isCreator && (
               <TouchableOpacity
                 onPress={() => setEditModalVisible(true)}
                 className="flex-row items-center bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200"

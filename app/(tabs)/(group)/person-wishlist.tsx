@@ -1,3 +1,4 @@
+import { normalizeAmazonLink } from '@/services/amazonAPI';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -29,9 +30,9 @@ export default function PersonWishlistScreen() {
 
   const handleBuyOnAmazon = async (url: string) => {
     try {
-      const supported = await Linking.canOpenURL(url);
+      const supported = await Linking.canOpenURL(await normalizeAmazonLink(url));
       if (supported) {
-        await Linking.openURL(url);
+        await Linking.openURL(await normalizeAmazonLink(url));
       } else {
         alert('Cannot open Amazon link');
       }

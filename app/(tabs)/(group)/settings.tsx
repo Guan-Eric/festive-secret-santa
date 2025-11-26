@@ -208,7 +208,7 @@ export default function SettingsScreen() {
         </View>
 
         {/* Support & Legal */}
-        <View className="bg-white rounded-2xl mb-4 border-2 border-stone-200 overflow-hidden">
+        {/* <View className="bg-white rounded-2xl mb-4 border-2 border-stone-200 overflow-hidden">
           <Text className="text-sm text-stone-500 uppercase tracking-wider px-6 pt-5 pb-3">
             Support & Legal
           </Text>
@@ -248,7 +248,7 @@ export default function SettingsScreen() {
             </View>
             <Ionicons name="chevron-forward" size={20} color="#A8A29E" />
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         {/* App Info */}
         <View className="bg-white rounded-2xl mb-4 border-2 border-stone-200 p-6">

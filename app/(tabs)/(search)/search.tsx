@@ -95,8 +95,8 @@ export default function SearchScreen() {
         groupId: selectedGroup,
         productName: manualProductName.trim(),
         productUrl: affiliateUrl,
-        price: manualPrice.trim() || undefined,
-        notes: manualNotes.trim() || undefined,
+        price: manualPrice.trim() || "",
+        notes: manualNotes.trim() || "",
         emoji: '🎁',
       });
 

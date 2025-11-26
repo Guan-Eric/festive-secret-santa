@@ -44,3 +44,49 @@ const getMockProducts = (query: string) => {
     // ... more mock products
   ];
 };
+
+export async function normalizeAmazonLink(url: string): Promise<string> {
+  let finalUrl = url;
+
+  // 1. Expand short links (a.co)
+  if (url.includes("a.co/")) {
+    try {
+      const res = await fetch(url, { method: "GET", redirect: "follow" });
+      finalUrl = res.url;
+      console.log("Expanded:", finalUrl);
+    } catch (e) {
+      console.warn("Expand failed:", e);
+    }
+  }
+
+  try {
+    const parsed = new URL(finalUrl);
+
+    // 2. Extract ASIN
+    let asin = null;
+
+    // Formats:
+    // /dp/ASIN
+    // /gp/product/ASIN
+    const dpMatch = parsed.pathname.match(/\/dp\/([A-Z0-9]{8,12})/i);
+    const gpMatch = parsed.pathname.match(/\/product\/([A-Z0-9]{8,12})/i);
+
+    asin = dpMatch?.[1] || gpMatch?.[1];
+
+    if (!asin) {
+      console.warn("ASIN not found in URL, returning original");
+      return finalUrl;
+    }
+
+    // 3. Build clean URL
+    const cleanUrl = `https://${parsed.hostname}/dp/${asin}`;
+
+    // 4. Add your affiliate tag
+    console.log(`${cleanUrl}?tag=${AMAZON_ASSOCIATE_TAG}`)
+    return `${cleanUrl}?tag=${AMAZON_ASSOCIATE_TAG}`;
+
+  } catch (e) {
+    console.error("Error normalizing URL:", e);
+    return finalUrl;
+  }
+}
