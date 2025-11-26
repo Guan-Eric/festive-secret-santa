@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Privacy Notice — Ready to Deploy</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#0ea5a4; --muted:#94a3b8; --glass: rgba(255,255,255,0.03);
+      --success:#16a34a; --danger:#ef4444; --surface:#0b1220;
+      --maxw:1000px;
+    }
+    html,body{height:100%; margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial; background:linear-gradient(180deg,#071124 0%, #071726 100%); color:#e6eef6;}
+    .container{max-width:var(--maxw); margin:28px auto; padding:20px; display:grid; grid-template-columns: 1fr 320px; gap:20px;}
+    header{grid-column:1/-1; display:flex; gap:12px; align-items:center; justify-content:space-between;}
+    .brand{display:flex; gap:12px; align-items:center}
+    .logo{width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#7dd3fc); display:flex;align-items:center;justify-content:center;font-weight:700;color:#012; box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    h1{margin:0;font-size:20px}
+    .sub{color:var(--muted); font-size:13px}
+    .vercel-ready{background:linear-gradient(90deg, rgba(14,165,164,0.12), rgba(125,211,252,0.06)); padding:10px 12px; border-radius:8px; font-size:13px; color:var(--accent); display:flex; gap:10px; align-items:center; border:1px solid rgba(125,211,252,0.06)}
+    .left{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); padding:18px; border-radius:12px; box-shadow: 0 6px 18px rgba(2,6,23,0.6); overflow:auto; max-height:78vh}
+    .right{background:var(--card); padding:18px; border-radius:12px; box-shadow:0 6px 18px rgba(2,6,23,0.6); height:fit-content; align-self:start}
+    nav.toc{margin-bottom:18px}
+    nav.toc a{display:inline-block; margin:6px 8px 6px 0; color:var(--accent); text-decoration:none; font-size:13px; background:var(--glass); padding:6px 8px; border-radius:8px}
+    article h2{border-bottom:1px dashed rgba(255,255,255,0.04); padding-bottom:8px; margin-top:18px; margin-bottom:8px}
+    p, li{color:#d3e3f3; line-height:1.5; font-size:14px}
+    ul{padding-left:18px}
+    .meta-actions{display:flex; gap:8px; flex-wrap:wrap}
+    button{cursor:pointer; border:0; padding:10px 12px; border-radius:8px; background:linear-gradient(90deg,#0ea5a4,#7dd3fc); color:#012; font-weight:600}
+    button.ghost{background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); font-weight:600}
+    button.warn{background:linear-gradient(90deg,#f97316,#f43f5e); color:white}
+    .small{font-size:13px; padding:8px 10px}
+    .status{display:flex; gap:8px; align-items:center; margin-top:12px}
+    .pill{padding:6px 8px; border-radius:999px; font-size:12px}
+    .pill.ok{background:rgba(22,163,74,0.12); color:var(--success); border:1px solid rgba(22,163,74,0.08)}
+    .pill.draft{background:rgba(14,165,164,0.06); color:var(--accent); border:1px solid rgba(125,211,252,0.04)}
+    .controls{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
+    .meta{font-size:13px; color:var(--muted); margin-top:10px}
+    footer{grid-column:1/-1; text-align:center; margin-top:18px; color:var(--muted); font-size:13px}
+    /* modal */
+    .modal{position:fixed; left:0; top:0; right:0; bottom:0; display:none; align-items:center; justify-content:center; background:rgba(2,6,23,0.6); z-index:40}
+    .modal.open{display:flex}
+    .editor{width:min(1000px,96%); max-height:86vh; background:#071124; border-radius:10px; padding:12px; box-shadow:0 30px 80px rgba(0,0,0,0.7); display:grid; grid-template-rows: auto 1fr auto; gap:8px}
+    .editor textarea{width:100%; height:56vh; background:#06101a; color:#e6eef6; border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,0.03); resize:vertical; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:13px}
+    .editor .buttons{display:flex; gap:8px; justify-content:flex-end}
+    .muted{color:var(--muted); font-size:13px}
+    .danger{color:var(--danger)}
+    @media (max-width:980px){ .container{grid-template-columns:1fr; padding:12px} .right{order:2} .left{order:1} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">PP</div>
+        <div>
+          <h1>Privacy Notice — Ready to Deploy</h1>
+          <div class="sub">Use this Privacy Notice on your site. Edit, preview, and download.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="vercel-ready" title="Static HTML ready for Vercel">
+          <strong>Ready for Vercel</strong>
+          <span class="muted" style="margin-left:8px">Deploy this file as <code>index.html</code></span>
+        </div>
+      </div>
+    </header>
+
+    <main class="left" id="policy-card">
+      <nav class="toc" aria-label="Table of contents">
+        <a href="#summary">Summary</a>
+        <a href="#toc">Table of Contents</a>
+        <a href="#what">What we collect</a>
+        <a href="#how">How we process</a>
+        <a href="#share">When we share</a>
+        <a href="#cookies">Cookies</a>
+        <a href="#rights">Your rights</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <article id="policy">
+        <h2 id="summary">PRIVACY NOTICE — Summary</h2>
+        <p><strong>Last updated:</strong> <span id="last-updated">__________</span></p>
+
+        <p>This Privacy Notice for <strong><span id="org-name">__________</span></strong> ("we," "us," or "our"), describes how and why we might access, collect, store, use, and/or share ("process") your personal information when you use our services ("Services"). Reading this Privacy Notice will help you understand your privacy rights and choices. If you do not agree with our policies and practices, please do not use our Services.</p>
+
+        <h2 id="toc">SUMMARY OF KEY POINTS</h2>
+        <ul>
+          <li>What personal information do we process? <em>Depends on how you interact with us</em>.</li>
+          <li>Do we process sensitive personal information? <strong>No</strong>.</li>
+          <li>Do we collect info from third parties? <em>We may</em>.</li>
+          <li>How do we process your info? <em>To provide and improve Services, security, and compliance</em>.</li>
+          <li>In what situations and with which parties do we share? <em>See the Sharing section below</em>.</li>
+          <li>What are your rights? <em>Depending on your location, you may have rights to access, update, or delete your data</em>.</li>
+        </ul>
+
+        <h2 id="toclist">TABLE OF CONTENTS</h2>
+        <ol>
+          <li><a href="#what">WHAT INFORMATION DO WE COLLECT?</a></li>
+          <li><a href="#how">HOW DO WE PROCESS YOUR INFORMATION?</a></li>
+          <li><a href="#share">WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?</a></li>
+          <li><a href="#cookies">DO WE USE COOKIES AND OTHER TRACKING TECHNOLOGIES?</a></li>
+          <li><a href="#social">HOW DO WE HANDLE YOUR SOCIAL LOGINS?</a></li>
+          <li><a href="#intl">IS YOUR INFORMATION TRANSFERRED INTERNATIONALLY?</a></li>
+          <li><a href="#retention">HOW LONG DO WE KEEP YOUR INFORMATION?</a></li>
+          <li><a href="#minors">DO WE COLLECT INFORMATION FROM MINORS?</a></li>
+          <li><a href="#rights">WHAT ARE YOUR PRIVACY RIGHTS?</a></li>
+          <li><a href="#dnt">CONTROLS FOR DO-NOT-TRACK FEATURES</a></li>
+          <li><a href="#updates">DO WE MAKE UPDATES TO THIS NOTICE?</a></li>
+          <li><a href="#contact">HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</a></li>
+          <li><a href="#manage">HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT?</a></li>
+        </ol>
+
+        <h2 id="what">1. WHAT INFORMATION DO WE COLLECT?</h2>
+        <h3>Personal information you disclose to us</h3>
+        <p><strong>In Short:</strong> We collect personal information that you provide to us.</p>
+        <p>We collect personal information that you voluntarily provide to us when you register on the Services, express an interest in obtaining information about us or our products and Services, when you participate in activities on the Services, or otherwise when you contact us.</p>
+        <p><strong>Sensitive Information:</strong> We do not process sensitive information.</p>
+        <p>All personal information you provide must be true and accurate.</p>
+
+        <h3>Information automatically collected</h3>
+        <p><strong>In Short:</strong> Some information — such as your IP address and/or browser and device characteristics — is collected automatically when you visit our Services.</p>
+        <p>We automatically collect certain information when you visit, use, or navigate the Services. This information may include device and usage information, such as your IP address, browser and device characteristics, operating system, language preferences, referring URLs, device name, country, location, information about how and when you use our Services, and other technical information.</p>
+        <p>Like many businesses, we also collect information through cookies and similar technologies.</p>
+
+        <h2 id="how">2. HOW DO WE PROCESS YOUR INFORMATION?</h2>
+        <p><strong>In Short:</strong> We process your data to provide, improve, and administer our Services, communicate with you, prevent fraud, and comply with law.</p>
+        <p>We process your personal information for reasons depending on how you interact with the Services, including to:</p>
+        <ul>
+          <li>Provide and maintain the Services</li>
+          <li>Authenticate and manage user accounts</li>
+          <li>Respond to requests and support inquiries</li>
+          <li>Send marketing and transactional communications (if consented)</li>
+          <li>Protect against fraud and abuse</li>
+        </ul>
+
+        <h2 id="share">3. WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?</h2>
+        <p><strong>In Short:</strong> We may share your information in certain situations — for example, during business transfers, with affiliates, or with service providers.</p>
+        <p>Examples include:</p>
+        <ul>
+          <li><strong>Business Transfers:</strong> Merger, sale, acquisition</li>
+          <li><strong>Affiliates:</strong> Shared within controlled companies</li>
+          <li><strong>Business Partners:</strong> For joint services or promotions</li>
+        </ul>
+
+        <h2 id="cookies">4. DO WE USE COOKIES AND OTHER TRACKING TECHNOLOGIES?</h2>
+        <p><strong>In Short:</strong> Yes — we may use cookies and other tracking technologies.</p>
+        <p>We may use cookies and similar tracking technologies (like web beacons and pixels) to gather information when you interact with our Services. We also allow third parties to use technologies for analytics and advertising. Specific details are provided in our Cookie Notice.</p>
+
+        <h2 id="social">5. HOW DO WE HANDLE YOUR SOCIAL LOGINS?</h2>
+        <p><strong>In Short:</strong> If you register via a social account, we may receive profile info from that provider.</p>
+        <p>We only use that profile information for the purposes described in this Notice or as otherwise made clear to you. We recommend reviewing the provider's privacy notice.</p>
+
+        <h2 id="intl">6. IS YOUR INFORMATION TRANSFERRED INTERNATIONALLY?</h2>
+        <p><strong>In Short:</strong> We may transfer, store, and process your information in countries other than your own.</p>
+        <p>Our servers are located in __________. If you are in the EEA/UK/Switzerland, please note laws may differ — we will take measures to protect your personal information.</p>
+
+        <h2 id="retention">7. HOW LONG DO WE KEEP YOUR INFORMATION?</h2>
+        <p><strong>In Short:</strong> We retain your data as long as necessary to fulfill the purposes outlined in this Notice or as required by law.</p>
+
+        <h2 id="minors">8. DO WE COLLECT INFORMATION FROM MINORS?</h2>
+        <p><strong>In Short:</strong> We do not knowingly collect personal information from children under 18.</p>
+
+        <h2 id="rights">9. WHAT ARE YOUR PRIVACY RIGHTS?</h2>
+        <p>You may have rights to access, correct, or delete your personal information depending on your jurisdiction. To exercise those rights, contact us as outlined below.</p>
+
+        <h2 id="dnt">10. CONTROLS FOR DO-NOT-TRACK FEATURES</h2>
+        <p>We currently do not respond to browser Do-Not-Track signals. If a standard is adopted we must follow, we will revise this Notice.</p>
+
+        <h2 id="updates">11. DO WE MAKE UPDATES TO THIS NOTICE?</h2>
+        <p><strong>In Short:</strong> Yes — we will update this Notice as needed. We will indicate the "Last updated" date above when we make material changes.</p>
+
+        <h2 id="contact">12. HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</h2>
+        <p>If you have questions or comments about this notice, contact us at:</p>
+        <pre style="background:rgba(255,255,255,0.02); padding:12px; border-radius:8px; color:var(--muted)"><em>__________<br>__________<br>__________</em></pre>
+
+        <h2 id="manage">13. HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM YOU?</h2>
+        <p>You may request access, correction, or deletion of your personal
