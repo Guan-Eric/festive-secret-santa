@@ -43,25 +43,23 @@ export default function SearchScreen() {
     return unsubscribe;
   }, [userId]);
 
-  const addAffiliateTag = (url: string): string => {
+  const validateAndCleanUrl = (url: string): string => {
     if (!url.trim()) return '';
-    
+  
+    // Normalize URL - add https:// if missing
+    let normalizedUrl = url.trim();
+    if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+      normalizedUrl = 'https://' + normalizedUrl;
+    }
+  
     try {
-      const urlObj = new URL(url);
-      
-      // Check if it's an Amazon URL
-      if (!urlObj.hostname.includes('amazon.com')) {
-        return url;
-      }
-
-      // Add or update the tag parameter
-      urlObj.searchParams.set('tag', AMAZON_ASSOCIATE_TAG);
-      return urlObj.toString();
+      // Just validate it's a proper URL
+      new URL(normalizedUrl);
+      return normalizedUrl;
     } catch (error) {
-      // If URL parsing fails, just append the tag
-      return url.includes('?') 
-        ? `${url}&tag=${AMAZON_ASSOCIATE_TAG}`
-        : `${url}?tag=${AMAZON_ASSOCIATE_TAG}`;
+      // If parsing fails, return original
+      console.warn('Invalid URL format:', url);
+      return url;
     }
   };
 
@@ -88,13 +86,13 @@ export default function SearchScreen() {
 
     setAdding(true);
     try {
-      const affiliateUrl = addAffiliateTag(amazonUrl);
+      const cleanUrl = validateAndCleanUrl(amazonUrl);
 
       await addWishlistItem({
         userId,
         groupId: selectedGroup,
         productName: manualProductName.trim(),
-        productUrl: affiliateUrl,
+        productUrl: cleanUrl,
         price: manualPrice.trim() || "",
         notes: manualNotes.trim() || "",
         emoji: '🎁',
